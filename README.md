@@ -34,7 +34,7 @@ To run this time machine locally on your machine, follow these simple steps:
 
 1. **Clone the repository**:
    ```bash
-   git clone [your-repo-url]
+   git clone https://github.com/Arsh-pixel-cmd/Windows-XP-Portfolio
    ```
 
 2. **Navigate to the project directory**:
@@ -66,5 +66,5 @@ Want to add your own flair to the XP desktop?
 ---
 
 <p align="center">
-  <i>Made with ❤️ and a lot of nostalgia.</i>
+  <i>Made by Arsh Mishra and a lot of nostalgia.</i>
 </p>
