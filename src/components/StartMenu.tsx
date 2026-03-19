@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   Globe, Mail, MessageSquare, Play, 
-  Settings, Search, HelpCircle, LogOut, 
+  Settings, Search, HelpCircle,
   Power, Folder, FileText, Image as ImageIcon, 
   Music, Computer, HardDrive
 } from 'lucide-react';
@@ -13,7 +13,7 @@ interface StartMenuProps {
 export const StartMenu: React.FC<StartMenuProps> = ({ onClose }) => {
   return (
     <div 
-      className="absolute bottom-full left-0 w-[380px] bg-[#1D5ADA] rounded-t-lg shadow-2xl flex flex-col z-[10000] border-t-2 border-l-2 border-r-2 border-[#1B4B1C] overflow-hidden select-none"
+      className="absolute bottom-full left-0 w-[380px] bg-[#1D5ADA] rounded-t-lg shadow-2xl flex flex-col z-[10000] border-t-2 border-l-2 border-r-2 border-[#1B4B1C] overflow-hidden select-none font-tahoma"
       onClick={(e) => e.stopPropagation()}
     >
       {/* Header */}
@@ -140,13 +140,19 @@ export const StartMenu: React.FC<StartMenuProps> = ({ onClose }) => {
 
       {/* Footer */}
       <div className="h-10 bg-gradient-to-r from-[#1D5ADA] via-[#4287F5] to-[#1D5ADA] p-1.5 flex items-center justify-end gap-4 border-t border-[#0A3D91]">
-        <button className="flex items-center gap-1 hover:bg-white/10 px-2 py-0.5 rounded-sm transition-colors group">
+        <button 
+          className="flex items-center gap-1 hover:bg-white/10 px-2 py-0.5 rounded-sm transition-colors group"
+          onClick={onClose}
+        >
           <div className="w-4 h-4 bg-orange-400 rounded-sm flex items-center justify-center">
              <div className="w-2 h-2 border-2 border-white rotate-45" />
           </div>
           <span className="text-white text-[12px] group-hover:underline">Log Off</span>
         </button>
-        <button className="flex items-center gap-1 hover:bg-white/10 px-2 py-0.5 rounded-sm transition-colors group">
+        <button 
+          className="flex items-center gap-1 hover:bg-white/10 px-2 py-0.5 rounded-sm transition-colors group"
+          onClick={onClose}
+        >
           <div className="w-4 h-4 bg-red-600 rounded-sm flex items-center justify-center">
              <Power className="text-white w-3 h-3" />
           </div>

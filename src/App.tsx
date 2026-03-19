@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Folder, FileText, Mail } from 'lucide-react';
+import { Folder, FileText, Mail, Monitor, Globe, Trash2 } from 'lucide-react';
 import { DesktopIcon } from './components/DesktopIcon';
 import { Taskbar } from './components/Taskbar';
 import { Window } from './components/Window';
@@ -8,6 +8,52 @@ import { AboutMe } from './components/AboutMe';
 import { Contact } from './components/Contact';
 import blissImage from './assets/bliss.png';
 import { StartMenu } from './components/StartMenu';
+
+// Mock components for new icons
+const MyComputer = () => (
+  <div className="p-4 flex flex-col gap-4">
+    <div className="flex items-center gap-2 border-b pb-2">
+      <Monitor className="text-blue-500" size={24} />
+      <h2 className="text-lg font-bold">System Information</h2>
+    </div>
+    <div className="grid grid-cols-2 gap-4 text-sm">
+      <div className="font-bold">Computer Name:</div>
+      <div>XP-PORTFOLIO-PC</div>
+      <div className="font-bold">Processor:</div>
+      <div>DeepMind Agent Core™ 1.0</div>
+      <div className="font-bold">Memory:</div>
+      <div>64 GB RAM</div>
+      <div className="font-bold">OS Version:</div>
+      <div>Windows XP Professional (Agentic Edition)</div>
+    </div>
+  </div>
+);
+
+const NetworkNeighborhood = () => (
+  <div className="p-8 flex flex-col items-center justify-center h-full text-center gap-4 text-gray-500 italic">
+    <Globe size={64} className="opacity-20" />
+    <p>Searching for computers in the network...</p>
+    <p className="text-xs">No other devices found in the current workgroup.</p>
+  </div>
+);
+
+const RecycleBin = () => (
+  <div className="p-4 flex flex-col gap-2 h-full">
+    <div className="flex-1 border-2 border-gray-100 bg-white shadow-inner p-2 overflow-auto">
+       <div className="grid grid-cols-4 gap-4">
+          <div className="flex flex-col items-center gap-1 opacity-50 grayscale">
+             <FileText size={32} />
+             <span className="text-[10px] text-center">old_resume_v1.pdf</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 opacity-50 grayscale">
+             <FileText size={32} />
+             <span className="text-[10px] text-center">unfinished_project.zip</span>
+          </div>
+       </div>
+    </div>
+    <div className="text-[11px] text-gray-500 italic">2 items (1.2 MB total)</div>
+  </div>
+);
 
 // Configuration
 interface DesktopIconDefinition {
@@ -19,6 +65,27 @@ interface DesktopIconDefinition {
 }
 
 const DESKTOP_ICONS: DesktopIconDefinition[] = [
+  { 
+    id: 'computer', 
+    label: 'My Computer', 
+    icon: <Monitor size={32} fill="#4176CF" className="text-blue-200 drop-shadow-md" />, 
+    component: <MyComputer />, 
+    size: { width: 450, height: 350 } 
+  },
+  { 
+    id: 'network', 
+    label: 'Network Neighborhood', 
+    icon: <Globe size={32} fill="#3B82F6" className="text-white drop-shadow-md" />, 
+    component: <NetworkNeighborhood />, 
+    size: { width: 400, height: 350 } 
+  },
+  { 
+    id: 'trash', 
+    label: 'Recycle Bin', 
+    icon: <Trash2 size={32} fill="#E2E8F0" className="text-gray-400 drop-shadow-md" />, 
+    component: <RecycleBin />, 
+    size: { width: 400, height: 400 } 
+  },
   { 
     id: 'projects', 
     label: 'My Projects', 

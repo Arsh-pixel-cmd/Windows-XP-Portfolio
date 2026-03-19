@@ -52,7 +52,7 @@ export const Window: React.FC<WindowProps> = ({
           className="window-header h-[30px] bg-gradient-to-r from-[#0058EE] to-[#378DFF] flex items-center justify-between cursor-move select-none p-1 shrink-0"
           onPointerDown={(e) => dragControls.start(e)}
         >
-          <div className="flex items-center gap-1.5 font-bold text-white text-xs px-1 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.6)]" style={{ fontFamily: "Tahoma, 'MS Sans Serif', sans-serif" }}>
+          <div className="flex items-center gap-1.5 font-bold text-white text-xs px-1 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.6)] font-trebuchet">
             {icon} {title}
           </div>
           <div className="flex gap-[2px] pr-0.5 pb-0.5" onPointerDown={e => e.stopPropagation()}>
@@ -75,7 +75,7 @@ export const Window: React.FC<WindowProps> = ({
           </div>
         </div>
         {/* Content */}
-        <div className="flex-1 flex flex-col m-1 bg-white border border-[#7A96DF] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.1)] overflow-hidden text-sm" style={{ fontFamily: "Tahoma, 'MS Sans Serif', sans-serif" }} onPointerDown={e => e.stopPropagation()}>
+        <div className="flex-1 flex flex-col m-1 bg-white border border-[#7A96DF] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.1)] overflow-hidden text-sm font-tahoma" onPointerDown={e => e.stopPropagation()}>
           {children}
         </div>
       </Resizable>

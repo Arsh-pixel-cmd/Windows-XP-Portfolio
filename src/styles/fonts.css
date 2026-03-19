@@ -1,0 +1,20 @@
+:root {
+  --font-tahoma: 'Tahoma', 'Verdana', 'Segoe UI', sans-serif;
+  --font-trebuchet: 'Trebuchet MS', 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', Tahoma, sans-serif;
+  --font-arial: 'Arial', 'Helvetica', sans-serif;
+  --font-ms-sans-serif: 'MS Sans Serif', 'Geneva', sans-serif;
+  --font-courier: 'Courier New', Courier, monospace;
+  --font-lucida: 'Lucida Console', 'Monaco', monospace;
+}
+
+body {
+  font-family: var(--font-tahoma);
+  -webkit-font-smoothing: none; /* XP didn't have heavy smoothing by default */
+}
+
+.font-tahoma { font-family: var(--font-tahoma); }
+.font-trebuchet { font-family: var(--font-trebuchet); }
+.font-arial { font-family: var(--font-arial); }
+.font-ms-sans-serif { font-family: var(--font-ms-sans-serif); }
+.font-courier { font-family: var(--font-courier); }
+.font-lucida { font-family: var(--font-lucida); }

@@ -15,7 +15,7 @@ export const DesktopIcon: React.FC<DesktopIconProps> = ({ label, icon, onDoubleC
       <div className="w-10 h-10 flex items-center justify-center mb-1 drop-shadow-md">
         {icon}
       </div>
-      <div className="text-center text-xs text-white drop-shadow-[1px_1px_1px_rgba(0,0,0,0.8)] px-0.5 leading-tight group-hover:bg-[#0B61FF] group-hover:drop-shadow-none line-clamp-2" style={{ fontFamily: "Tahoma, 'MS Sans Serif', sans-serif" }}>
+      <div className="text-center text-[11px] text-white drop-shadow-[1px_1px_1px_rgba(0,0,0,0.8)] px-0.5 leading-tight group-hover:bg-[#0B61FF] group-hover:drop-shadow-none line-clamp-2 font-tahoma">
         {label}
       </div>
     </div>
