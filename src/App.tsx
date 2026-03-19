@@ -6,6 +6,8 @@ import { Window } from './components/Window';
 import { Projects } from './components/Projects';
 import { AboutMe } from './components/AboutMe';
 import { Contact } from './components/Contact';
+import blissImage from './assets/bliss.png';
+import { StartMenu } from './components/StartMenu';
 
 // Configuration
 interface DesktopIconDefinition {
@@ -44,6 +46,7 @@ export default function App() {
   const [windows, setWindows] = useState<{ id: string; zIndex: number }[]>([]);
   const [activeWindow, setActiveWindow] = useState<string | null>(null);
   const [zIndexCounter, setZIndexCounter] = useState(10);
+  const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
 
   const openWindow = (id: string) => {
     if (windows.find(w => w.id === id)) {
@@ -91,8 +94,11 @@ export default function App() {
   return (
     <div 
       className="w-full h-screen overflow-hidden relative bg-cover bg-center select-none bg-blue-500"
-      style={{ backgroundImage: `url('https://images.unsplash.com/photo-1691359065595-7c74aad7ab20?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyb2xsaW5nJTIwZ3JlZW4lMjBoaWxscyUyMGxhbmRzY2FwZXxlbnwxfHx8fDE3NzM5MjY0MjR8MA&ixlib=rb-4.1.0&q=80&w=1080')` }}
-      onClick={() => setActiveWindow(null)} // Click desktop to unfocus
+      style={{ backgroundImage: `url(${blissImage})` }}
+      onClick={() => {
+        setActiveWindow(null);
+        setIsStartMenuOpen(false);
+      }} // Click desktop to unfocus and close start menu
     >
       {/* Desktop Icons Area */}
       <div className="absolute top-0 left-0 p-4 flex flex-col gap-2 z-0 pointer-events-auto" onClick={e => e.stopPropagation()}>
@@ -129,7 +135,13 @@ export default function App() {
 
       {/* Taskbar */}
       <div onClick={e => e.stopPropagation()} className="pointer-events-auto absolute bottom-0 w-full z-[9999]">
-        <Taskbar openWindows={taskbarWindows} onTaskClick={focusWindow} />
+        {isStartMenuOpen && <StartMenu onClose={() => setIsStartMenuOpen(false)} />}
+        <Taskbar 
+          openWindows={taskbarWindows} 
+          onTaskClick={focusWindow} 
+          onStartClick={() => setIsStartMenuOpen(!isStartMenuOpen)}
+          isStartMenuOpen={isStartMenuOpen}
+        />
       </div>
     </div>
   );

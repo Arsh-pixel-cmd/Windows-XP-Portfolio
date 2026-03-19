@@ -4,9 +4,11 @@ import { format } from 'date-fns';
 interface TaskbarProps {
   openWindows: { id: string; title: string; icon: React.ReactNode; active: boolean }[];
   onTaskClick: (id: string) => void;
+  onStartClick: () => void;
+  isStartMenuOpen: boolean;
 }
 
-export const Taskbar: React.FC<TaskbarProps> = ({ openWindows, onTaskClick }) => {
+export const Taskbar: React.FC<TaskbarProps> = ({ openWindows, onTaskClick, onStartClick, isStartMenuOpen }) => {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -16,8 +18,18 @@ export const Taskbar: React.FC<TaskbarProps> = ({ openWindows, onTaskClick }) =>
 
   return (
     <div className="w-full h-[30px] bg-gradient-to-b from-[#245EDB] via-[#1447A8] to-[#1447A8] flex items-center select-none shadow-[0_-1px_2px_rgba(0,0,0,0.3)]">
-      {/* Start Button */}
-      <button className="h-full px-3 flex items-center gap-1.5 bg-gradient-to-b from-[#3C913E] to-[#2B6D2D] hover:from-[#4AA84C] hover:to-[#338135] rounded-r-2xl italic font-bold text-white text-[15px] shadow-[inset_1px_1px_2px_rgba(255,255,255,0.4),2px_0_3px_rgba(0,0,0,0.3)] border-r border-[#1B4B1C]" style={{ fontFamily: "'Trebuchet MS', Tahoma, sans-serif" }}>
+      <button 
+        onClick={(e) => {
+          e.stopPropagation();
+          onStartClick();
+        }}
+        className={`h-full px-3 flex items-center gap-1.5 rounded-r-2xl italic font-bold text-white text-[15px] shadow-[inset_1px_1px_2px_rgba(255,255,255,0.4),2px_0_3px_rgba(0,0,0,0.3)] border-r border-[#1B4B1C] transition-all ${
+          isStartMenuOpen 
+            ? 'bg-[#215123] from-[#2B6D2D] to-[#3C913E] shadow-[inset_2px_2px_3px_rgba(0,0,0,0.5)]' 
+            : 'bg-gradient-to-b from-[#3C913E] to-[#2B6D2D] hover:from-[#4AA84C] hover:to-[#338135]'
+        }`} 
+        style={{ fontFamily: "'Trebuchet MS', Tahoma, sans-serif" }}
+      >
         {/* Simple Windows Logo Fake */}
         <div className="grid grid-cols-2 gap-[1px] skew-y-6 skew-x-[-10deg] drop-shadow-sm w-4 h-4 ml-1">
            <div className="bg-[#F65314]"></div>
