@@ -1,7 +1,13 @@
 import React from 'react';
 import { FlaskConical, Terminal, Zap, CheckCircle2 } from 'lucide-react';
+import { Process, SystemState } from '../core/types';
 
-export const Experiments: React.FC = () => {
+interface ExperimentsProps {
+  process: Process;
+  systemState: SystemState;
+}
+
+export const Experiments: React.FC<ExperimentsProps> = () => {
   const experiments = [
     {
       id: 'devlens',

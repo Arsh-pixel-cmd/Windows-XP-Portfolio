@@ -1,6 +1,12 @@
 import React from 'react';
+import { Process, SystemState } from '../core/types';
 
-export const AboutMe: React.FC = () => {
+interface AboutMeProps {
+  process: Process;
+  systemState: SystemState;
+}
+
+export const AboutMe: React.FC<AboutMeProps> = () => {
   return (
     <div className="p-6 h-full overflow-auto bg-white text-gray-800 leading-relaxed font-tahoma">
       <div className="flex flex-col gap-6">

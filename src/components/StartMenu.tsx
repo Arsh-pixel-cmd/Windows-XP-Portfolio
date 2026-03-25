@@ -7,11 +7,11 @@ import {
 } from 'lucide-react';
 
 interface StartMenuProps {
+  onOpenApp: (appType: string) => void;
   onClose: () => void;
-  onOpenWindow: (id: string) => void;
 }
 
-export const StartMenu: React.FC<StartMenuProps> = ({ onClose, onOpenWindow }) => {
+export const StartMenu: React.FC<StartMenuProps> = ({ onClose, onOpenApp }) => {
   return (
     <div 
       className="absolute bottom-full left-0 w-[380px] bg-[#1D5ADA] rounded-t-lg shadow-2xl flex flex-col z-[10000] border-t-2 border-l-2 border-r-2 border-[#1B4B1C] overflow-hidden select-none font-tahoma"
@@ -37,7 +37,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({ onClose, onOpenWindow }) =
         <div className="w-[55%] flex flex-col p-1.5 gap-0.5 border-r border-[#91B2E6]">
           {/* Top Programs */}
           <div 
-            onClick={() => { onOpenWindow('terminal'); onClose(); }}
+            onClick={() => { onOpenApp('terminal'); onClose(); }}
             className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
           >
             <div className="bg-black p-1 rounded">
@@ -49,7 +49,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({ onClose, onOpenWindow }) =
             </div>
           </div>
           <div 
-            onClick={() => { onOpenWindow('contact'); onClose(); }}
+            onClick={() => { onOpenApp('contact'); onClose(); }}
             className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
           >
             <Mail className="text-[#2F71CD] group-hover:text-white w-8 h-8" />
@@ -63,35 +63,35 @@ export const StartMenu: React.FC<StartMenuProps> = ({ onClose, onOpenWindow }) =
 
           {/* Frequent Programs */}
           <div 
-            onClick={() => { onOpenWindow('projects'); onClose(); }}
+            onClick={() => { onOpenApp('projects'); onClose(); }}
             className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
           >
             <Folder className="text-yellow-500 group-hover:text-white w-8 h-8" />
             <span className="text-[13px]">My Portfolio Projects</span>
           </div>
           <div 
-            onClick={() => { onOpenWindow('systems'); onClose(); }}
+            onClick={() => { onOpenApp('systems'); onClose(); }}
             className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
           >
             <Monitor className="text-blue-600 group-hover:text-white w-8 h-8" />
             <span className="text-[13px]">System Architecture</span>
           </div>
           <div 
-            onClick={() => { onOpenWindow('experiments'); onClose(); }}
+            onClick={() => { onOpenApp('experiments'); onClose(); }}
             className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
           >
              <FlaskConical className="text-purple-500 group-hover:text-white w-8 h-8" />
             <span className="text-[13px]">Lab Experiments</span>
           </div>
           <div 
-            onClick={() => { onOpenWindow('notepad'); onClose(); }}
+            onClick={() => { onOpenApp('notepad'); onClose(); }}
             className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
           >
              <FileText className="text-gray-500 group-hover:text-white w-8 h-8" />
             <span className="text-[13px]">Notepad</span>
           </div>
           <div 
-            onClick={() => { onOpenWindow('monitor'); onClose(); }}
+            onClick={() => { onOpenApp('monitor'); onClose(); }}
             className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
           >
              <Cpu className="text-green-600 group-hover:text-white w-8 h-8" />
@@ -113,7 +113,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({ onClose, onOpenWindow }) =
         {/* Right Column (Places) */}
         <div className="w-[45%] bg-[#D3E5FA] flex flex-col p-1.5 gap-0.5 border-l border-white shadow-[inset_1px_0_1px_rgba(255,255,255,0.8)]">
           <div 
-            onClick={() => { onOpenWindow('projects'); onClose(); }}
+            onClick={() => { onOpenApp('projects'); onClose(); }}
             className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
           >
             <Folder className="text-[#D39943] group-hover:text-white w-6 h-6" />
@@ -126,7 +126,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({ onClose, onOpenWindow }) =
              </div>
           </div>
           <div 
-            onClick={() => { onOpenWindow('experiments'); onClose(); }}
+            onClick={() => { onOpenApp('experiments'); onClose(); }}
             className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
           >
             <FlaskConical className="text-[#4176CF] group-hover:text-white w-6 h-6" />
@@ -137,7 +137,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({ onClose, onOpenWindow }) =
             <span className="text-[12px] font-bold">My Music</span>
           </div>
           <div 
-            onClick={() => { onOpenWindow('systems'); onClose(); }}
+            onClick={() => { onOpenApp('systems'); onClose(); }}
             className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
           >
             <Computer className="text-[#4176CF] group-hover:text-white w-6 h-6" />
@@ -162,14 +162,14 @@ export const StartMenu: React.FC<StartMenuProps> = ({ onClose, onOpenWindow }) =
             <span className="text-[12px]">Help</span>
           </div>
           <div 
-            onClick={() => { onOpenWindow('terminal'); onClose(); }}
+            onClick={() => { onOpenApp('terminal'); onClose(); }}
             className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
           >
             <Search className="text-[#4176CF] group-hover:text-white w-6 h-6" />
             <span className="text-[12px]">Search</span>
           </div>
           <div 
-            onClick={() => { onOpenWindow('terminal'); onClose(); }}
+            onClick={() => { onOpenApp('terminal'); onClose(); }}
             className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
           >
             <HardDrive className="text-[#4176CF] group-hover:text-white w-6 h-6" />

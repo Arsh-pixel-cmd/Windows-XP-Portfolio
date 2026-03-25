@@ -10,6 +10,7 @@ export interface Process {
   createdAt: number;
   cpuUsage: number;
   memoryUsage: number;
+  params?: Record<string, any>;
   windowId: string;
 }
 
@@ -60,7 +61,8 @@ export type SystemEvent =
   | { type: 'WIN_MAXIMIZE'; payload: { id: string } }
   | { type: 'WIN_MOVE'; payload: { id: string; x: number; y: number } }
   | { type: 'WIN_RESIZE'; payload: { id: string; width: number; height: number } }
-  | { type: 'SYS_LOG'; payload: { level: 'INFO' | 'WARN' | 'ERROR'; message: string } };
+  | { type: 'SYS_LOG'; payload: { level: 'INFO' | 'WARN' | 'ERROR'; message: string } }
+  | { type: 'SYS_REBOOT'; payload?: undefined };
 
 export interface SystemState {
   processes: Process[];

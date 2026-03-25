@@ -1,66 +1,96 @@
 import React from 'react';
-import { Mail, Github, Linkedin } from 'lucide-react';
+import { Mail, Github, Linkedin, MapPin, Send, ExternalLink } from 'lucide-react';
+import { Process, SystemState } from '../core/types';
 
-export const Contact: React.FC = () => {
+interface ContactProps {
+  process: Process;
+  systemState: SystemState;
+}
+
+export const Contact: React.FC<ContactProps> = () => {
   return (
     <div className="h-full bg-[#ECE9D8] flex flex-col font-tahoma">
       <div className="p-8 flex-1 overflow-auto">
-        <div className="max-w-md mx-auto bg-white border border-[#7A96DF] p-6 shadow-sm">
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Let’s build something real.</h2>
-          <p className="text-xs text-gray-500 mb-6">Establishing secure connection to Arsh's neural link...</p>
+        <div className="max-w-2xl mx-auto space-y-8">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900">Get In Touch</h2>
+            <p className="text-gray-600 mt-2">Open for collaborations, system design roles, and interesting engineering challenges.</p>
+          </div>
 
-          <div className="space-y-4">
-            <a
-              href="mailto:arshmishra37@gmail.com"
-              className="flex items-center gap-4 p-3 bg-gray-50 border border-gray-100 hover:bg-white hover:border-blue-300 transition-all group"
-            >
-              <div className="w-10 h-10 rounded bg-blue-100 flex items-center justify-center text-blue-600">
-                <Mail size={20} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white p-6 border border-gray-300 shadow-sm rounded-sm">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Mail className="text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Email</p>
+                  <a href="mailto:arsh_mishra@engineer.com" className="text-blue-600 hover:underline font-bold">arsh_mishra@engineer.com</a>
+                </div>
               </div>
-              <div>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Email</p>
-                <p className="text-sm font-bold text-gray-800">arshmishra37@gmail.com</p>
-              </div>
-            </a>
+            </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <a
-                href="https://github.com/Arsh-pixel-cmd" target="_blank" rel="noreferrer"
-                className="flex flex-col items-center gap-2 p-4 bg-gray-50 border border-gray-100 hover:bg-white hover:border-blue-300 transition-all group text-center"
-              >
-                <Github size={24} className="text-gray-700" />
-                <span className="text-xs font-bold text-gray-600">GitHub</span>
-              </a>
-              <a
-                href="https://www.linkedin.com/in/arsh-mishra-030093325/" target="_blank" rel="noreferrer"
-                className="flex flex-col items-center gap-2 p-4 bg-gray-50 border border-gray-100 hover:bg-white hover:border-blue-300 transition-all group text-center"
-              >
-                <Linkedin size={24} className="text-blue-700" />
-                <span className="text-xs font-bold text-gray-600">LinkedIn</span>
-              </a>
+            <div className="bg-white p-6 border border-gray-300 shadow-sm rounded-sm text-gray-400 italic">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <MapPin className="text-gray-400" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Location</p>
+                  <p className="font-bold">New Delhi / Remote</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Available for</p>
-            <div className="flex flex-wrap gap-2">
-              {['Freelance', 'Internships', 'System Design', 'AI Engineering'].map(tag => (
-                <span key={tag} className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-[10px] font-bold">
-                  {tag}
-                </span>
-              ))}
-            </div>
+          <div className="flex gap-4">
+            <a 
+              href="https://github.com/arsh-mishra" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex-1 bg-gray-900 text-white p-4 rounded-sm flex items-center justify-center gap-2 hover:bg-black transition-colors"
+            >
+              <Github size={20} />
+              <span className="font-bold">GitHub</span>
+              <ExternalLink size={14} className="opacity-50" />
+            </a>
+            <a 
+              href="https://linkedin.com/in/arsh-mishra" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex-1 bg-[#0077b5] text-white p-4 rounded-sm flex items-center justify-center gap-2 hover:bg-[#006396] transition-colors"
+            >
+              <Linkedin size={20} />
+              <span className="font-bold">LinkedIn</span>
+              <ExternalLink size={14} className="opacity-50" />
+            </a>
+          </div>
+
+          <div className="bg-white border border-gray-300 p-8 shadow-sm">
+             <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+               <Send size={18} className="text-blue-500" />
+               System Signal
+             </h3>
+             <div className="space-y-4">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-gray-600">Subject</label>
+                  <input type="text" className="w-full border border-gray-300 p-2 text-sm focus:outline-blue-500" placeholder="Engineering Inquiry..." />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-gray-600">Message Payload</label>
+                  <textarea className="w-full border border-gray-300 p-2 text-sm min-h-[100px] focus:outline-blue-500 resize-none" placeholder="Enter your proposal here..." />
+                </div>
+                <button className="bg-[#1D5ADA] text-white px-6 py-2 rounded-sm font-bold text-sm hover:bg-[#316AC5] border-b-2 border-r-2 border-[#0A3D91] active:border-0 shadow-md">
+                   Dispatch Process
+                </button>
+             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-[#D4D0C8] p-2 flex justify-end gap-2 border-t border-white">
-        <button className="px-4 py-1 bg-[#ECE9D8] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-500 shadow-sm text-xs font-bold active:border-gray-500 active:border-b-white active:border-r-white min-w-[80px]">
-          Cancel
-        </button>
-        <button className="px-4 py-1 bg-[#ECE9D8] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-500 shadow-sm text-xs font-bold active:border-gray-500 active:border-b-white active:border-r-white min-w-[80px]">
-          Send Message
-        </button>
+      <div className="h-8 bg-[#ECE9D8] border-t border-gray-300 px-4 flex items-center justify-between text-[10px] text-gray-500 italic">
+        <span>Protocol: SMTP/Secure</span>
+        <span>Availability: {'>'}99.9%</span>
       </div>
     </div>
   );

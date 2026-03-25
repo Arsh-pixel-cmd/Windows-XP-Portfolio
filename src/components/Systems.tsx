@@ -1,6 +1,18 @@
 import React from 'react';
+import { Process, SystemState } from '../core/types';
 
-export const Systems: React.FC = () => {
+interface SystemsProps {
+  process: Process;
+  systemState: SystemState;
+}
+
+const ActivityIcon = ({ size, className }: { size: number, className: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+  </svg>
+);
+
+export const Systems: React.FC<SystemsProps> = () => {
   return (
     <div className="p-6 flex flex-col gap-8 h-full overflow-auto bg-[#F0F0F0] text-gray-900 font-tahoma selection:bg-[#316AC5] selection:text-white">
       <div className="border-b-2 border-[#0058EE] pb-4">
@@ -79,15 +91,11 @@ GC Cycles:         [#---------] 1`}
       </div>
 
       <div className="mt-auto bg-blue-50 p-4 border-l-4 border-blue-600 text-xs italic text-blue-900 flex gap-3 items-center">
-        <Activity size={24} className="shrink-0" />
+        <ActivityIcon size={24} className="shrink-0" />
         "Engineering is not about avoiding problems; it's about building systems that handle them gracefully by design."
       </div>
     </div>
   );
 };
 
-const Activity = ({ size, className }: { size: number, className: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-  </svg>
-);
+export default Systems;

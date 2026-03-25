@@ -1,5 +1,11 @@
 import React from 'react';
 import { ExternalLink, Github, Rocket } from 'lucide-react';
+import { Process, SystemState } from '../core/types';
+
+interface ProjectsProps {
+  process: Process;
+  systemState: SystemState;
+}
 
 const PROJECT_LIST = [
   {
@@ -62,7 +68,7 @@ const PROJECT_LIST = [
   }
 ];
 
-export const Projects: React.FC = () => {
+export const Projects: React.FC<ProjectsProps> = () => {
   return (
     <div className="h-full bg-white flex flex-col font-tahoma">
       <div className="bg-[#F0F0E0] p-4 border-b border-[#D4D0C8] flex items-center justify-between shrink-0">
@@ -75,7 +81,7 @@ export const Projects: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-4 custom-scrollbar">
+      <div className="flex-1 overflow-auto p-4 custom-scrollbar text-gray-900 selection:bg-[#316AC5] selection:text-white">
         <div className="grid grid-cols-1 gap-6">
           {PROJECT_LIST.map((project, idx) => (
             <div key={idx} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
@@ -136,3 +142,5 @@ export const Projects: React.FC = () => {
     </div>
   );
 };
+
+export default Projects;

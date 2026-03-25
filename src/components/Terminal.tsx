@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Process, SystemState } from '../core/types';
+import { systemBus } from '../core/eventBus';
+import { resolvePath, FileSystemError } from '../core/vfs';
 
 interface TerminalProps {
-  onOpenWindow: (id: string) => void;
-  dispatch: React.Dispatch<any>;
-  windows: any[];
+  process: Process;
+  systemState: SystemState;
 }
 
-export const Terminal: React.FC<TerminalProps> = ({ onOpenWindow }) => {
+export const Terminal: React.FC<TerminalProps> = ({ systemState }) => {
   const [history, setHistory] = useState<string[]>(['Microsoft Windows XP [Version 5.1.2600]', '(C) Copyright 1985-2001 Microsoft Corp.', '']);
+  const [currentDir, setCurrentDir] = useState('C:/Users/Arsh');
   const [input, setInput] = useState('');
   const [cmdHistory, setCmdHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -25,46 +28,101 @@ export const Terminal: React.FC<TerminalProps> = ({ onOpenWindow }) => {
     setCmdHistory(prev => [fullCmd, ...prev]);
     setHistoryIndex(-1);
 
-    const parts = fullCmd.toLowerCase().split(' ');
-    const cmd = parts[0];
+    const parts = fullCmd.split(' ');
+    const cmd = parts[0].toLowerCase();
     const args = parts.slice(1);
     
-    const newHistory = [...history, `C:\\Documents and Settings\\Arsh> ${fullCmd}`];
+    setHistory(prev => [...prev, `${currentDir}> ${fullCmd}`]);
 
     switch (cmd) {
       case 'help':
-        newHistory.push('Help Utility v1.0', 'Available commands:', '  help           Display this message', '  clear          Clear the screen', '  whoami         Display user info', '  ls             List desktop applications', '  open <app>     Open an application', '  kill <app>     Close an application', '  ps             List processes');
+        setHistory(prev => [...prev, 'Available commands:', '  ls [path]      List files', '  cd <path>      Change directory', '  cat <file>     Read file content', '  ps             List running processes', '  kill <pid>     Terminate a process', '  clear          Clear screen', '  whoami         System identity']);
         break;
       case 'clear':
         setHistory([]);
-        setInput('');
-        return;
+        break;
       case 'whoami':
-        newHistory.push('arsh_mishra // senior_software_engineer // systems_architect');
+        setHistory(prev => [...prev, 'arsh_mishra // systems_architect // kernel_mode']);
         break;
-      case 'ls':
-        newHistory.push('Applications:', '  About.exe, Projects.exe, Systems.exe, Experiments.exe,', '  Resume.txt, Notepad.exe, SysMon.exe, Contact.exe');
-        break;
-      case 'open':
-        if (args[0]) {
-          const app = args[0].replace('.exe', '').replace('.txt', '');
-          newHistory.push(`Attempting to spawn process: ${app}...`);
-          onOpenWindow(app);
-        } else {
-          newHistory.push('Usage: open <application_name>');
+      case 'ls': {
+        try {
+          const path = args[0] || '.';
+          const dir = resolvePath(systemState.fileSystem, path, currentDir);
+          if (dir.type !== 'directory') {
+            setHistory(prev => [...prev, `ls: ${path}: Not a directory`]);
+          } else {
+            const files = Object.keys(dir.children || {}).join('  ');
+            setHistory(prev => [...prev, files || '(empty directory)']);
+          }
+        } catch (err: any) {
+          setHistory(prev => [...prev, `ls: ${err.message}`]);
         }
         break;
-      case 'ps':
-        newHistory.push('Active Processes:', ...args.map(a => `PID 1241: ${a}`));
+      }
+      case 'cd': {
+        try {
+          const path = args[0] || 'C:/Users/Arsh';
+          const dir = resolvePath(systemState.fileSystem, path, currentDir);
+          if (dir.type !== 'directory') {
+            setHistory(prev => [...prev, `cd: ${path}: Not a directory`]);
+          } else {
+             // Basic path normalization for display
+             const newPath = path.startsWith('C:') ? path : `${currentDir}/${path}`.replace(/\/+/g, '/').replace(/\/$/, '');
+             setCurrentDir(newPath);
+          }
+        } catch (err: any) {
+          setHistory(prev => [...prev, `cd: ${err.message}`]);
+        }
         break;
-      case 'exit':
-        newHistory.push('System shutdown sequence initiated... Just kidding, use the [X] button.');
+      }
+      case 'cat': {
+        try {
+          const path = args[0];
+          if (!path) {
+            setHistory(prev => [...prev, 'Usage: cat <filename>']);
+            break;
+          }
+          const file = resolvePath(systemState.fileSystem, path, currentDir);
+          if (file.type === 'directory') {
+            setHistory(prev => [...prev, `cat: ${path}: Is a directory`]);
+          } else {
+            setHistory(prev => [...prev, file.content || '']);
+          }
+        } catch (err: any) {
+          setHistory(prev => [...prev, `cat: ${err.message}`]);
+        }
         break;
+      }
+      case 'ps': {
+        const header = 'PID    NAME         STATUS      CPU    MEM';
+        const rows = systemState.processes.map(p => 
+          `${p.pid.toString().padEnd(6)} ${p.name.padEnd(12)} ${p.status.padEnd(10)} ${p.cpuUsage.toFixed(1)}%   ${p.memoryUsage.toFixed(1)}MB`
+        );
+        setHistory(prev => [...prev, header, ...rows]);
+        break;
+      }
+      case 'kill': {
+        const pid = parseInt(args[0]);
+        if (isNaN(pid)) {
+          setHistory(prev => [...prev, 'Usage: kill <pid>']);
+        } else {
+          systemBus.emit({ type: 'PROC_KILL', payload: { pid } });
+          setHistory(prev => [...prev, `Sent SIGTERM to process ${pid}`]);
+        }
+        break;
+      }
+      case 'open': {
+        const app = args[0]?.replace('.exe', '');
+        if (app) {
+           systemBus.emit({ type: 'PROC_START', payload: { appType: app, title: `${app}.exe` } });
+        } else {
+          setHistory(prev => [...prev, 'Usage: open <app_name>']);
+        }
+        break;
+      }
       default:
-        newHistory.push(`'${cmd}' is not recognized as an internal or external command,`, 'operable program or batch file.');
+        setHistory(prev => [...prev, `'${cmd}' is not recognized as an internal or external command.`]);
     }
-
-    setHistory(newHistory);
     setInput('');
   };
 
@@ -99,7 +157,7 @@ export const Terminal: React.FC<TerminalProps> = ({ onOpenWindow }) => {
           <div key={i} className="min-h-[1.2rem] whitespace-pre-wrap">{line}</div>
         ))}
         <form onSubmit={handleCommand} className="flex items-center">
-          <span className="mr-2 text-green-500">C:\&gt;</span>
+          <span className="mr-2 text-green-500">{currentDir}&gt;</span>
           <input
             id="term-input"
             autoFocus
