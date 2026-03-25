@@ -8,6 +8,18 @@ import { systemScheduler } from './scheduler';
 
 const SYSTEM_VERSION = '1.0.0';
 
+const INITIAL_STATE_ICONS = [
+  { id: 'about', label: 'About.exe', appType: 'about', x: 20, y: 20 },
+  { id: 'projects', label: 'Projects.exe', appType: 'projects', x: 20, y: 110 },
+  { id: 'systems', label: 'Systems.exe', appType: 'systems', x: 20, y: 200 },
+  { id: 'experiments', label: 'Experiments.exe', appType: 'experiments', x: 20, y: 290 },
+  { id: 'terminal', label: 'cmd.exe', appType: 'terminal', x: 20, y: 380 },
+  { id: 'contact', label: 'Contact.exe', appType: 'contact', x: 20, y: 470 },
+  { id: 'notepad', label: 'Notepad.exe', appType: 'notepad', x: 110, y: 20 },
+  { id: 'monitor', label: 'SysMon.exe', appType: 'monitor', x: 110, y: 110 },
+  { id: 'logviewer', label: 'EventLog.exe', appType: 'logviewer', x: 110, y: 200 },
+];
+
 const INITIAL_STATE: SystemState = {
   version: SYSTEM_VERSION,
   tick: 0,
@@ -21,7 +33,8 @@ const INITIAL_STATE: SystemState = {
   resources: { cpuLoad: 2, memoryUsage: 124, isBlocked: false },
   currentPath: 'C:/Users/Arsh',
   activeWindowId: null,
-  bootStatus: 'ready'
+  bootStatus: 'ready',
+  desktopIcons: JSON.parse(localStorage.getItem('xp_desktop_icons') || 'null') || INITIAL_STATE_ICONS
 };
 
 let currentState: SystemState = INITIAL_STATE;
@@ -53,6 +66,11 @@ export const systemStore = {
         listeners.forEach(fn => fn(currentState));
         
         if (event.type !== 'TICK' && event.type !== 'SYS_LOG') {
+          // Persist desktop icons
+          if (event.type === 'ICON_MOVE') {
+            localStorage.setItem('xp_desktop_icons', JSON.stringify(nextState.desktopIcons));
+          }
+          
           log('INFO', `Executed ${event.type}`, { 
             eventType: event.type, 
             eventId,
@@ -175,6 +193,64 @@ function kernelReducer(state: SystemState, event: SystemEvent): SystemState {
 
     case 'FS_DELETE':
       return { ...state, fileSystem: deleteNode(state.fileSystem, joinPath(state.currentPath, event.payload.path)) };
+
+    case 'SYS_REFRESH':
+      localStorage.removeItem('xp_desktop_icons');
+      return { ...state, desktopIcons: INITIAL_STATE_ICONS };
+
+    case 'ICON_MOVE':
+      return {
+        ...state,
+        desktopIcons: state.desktopIcons.map(icon => 
+          icon.id === event.payload.id ? { ...icon, x: event.payload.x, y: event.payload.y } : icon
+        )
+      };
+
+    case 'WIN_FOCUS': {
+      const window = state.windows.find(w => w.id === event.payload.id);
+      if (!window) return state;
+      const maxZ = Math.max(...state.windows.map(w => w.zIndex), 0);
+      return {
+        ...state,
+        activeWindowId: event.payload.id,
+        windows: state.windows.map(w => 
+          w.id === event.payload.id ? { ...w, zIndex: maxZ + 1, isMinimized: false } : w
+        )
+      };
+    }
+
+    case 'WIN_MINIMIZE':
+      return {
+        ...state,
+        activeWindowId: state.activeWindowId === event.payload.id ? null : state.activeWindowId,
+        windows: state.windows.map(w => 
+          w.id === event.payload.id ? { ...w, isMinimized: true } : w
+        )
+      };
+
+    case 'WIN_MAXIMIZE':
+      return {
+        ...state,
+        windows: state.windows.map(w => 
+          w.id === event.payload.id ? { ...w, isMaximized: !w.isMaximized, isMinimized: false } : w
+        )
+      };
+
+    case 'WIN_MOVE':
+      return {
+        ...state,
+        windows: state.windows.map(w => 
+          w.id === event.payload.id ? { ...w, position: { x: event.payload.x, y: event.payload.y } } : w
+        )
+      };
+
+    case 'WIN_RESIZE':
+      return {
+        ...state,
+        windows: state.windows.map(w => 
+          w.id === event.payload.id ? { ...w, size: { width: event.payload.width, height: event.payload.height } } : w
+        )
+      };
 
     case 'SYS_LOG':
       return { ...state, logs: [event.payload, ...state.logs].slice(0, 500) };

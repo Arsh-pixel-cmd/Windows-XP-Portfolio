@@ -223,19 +223,30 @@ export default function App() {
       )}
 
       {/* Desktop Icons Area */}
-      <div className="absolute top-0 left-0 p-4 flex flex-col gap-2 z-0 pointer-events-auto" onClick={e => e.stopPropagation()}>
-        {DESKTOP_ICONS.map(iconDef => (
-          <DesktopIcon
-            key={iconDef.id}
-            label={iconDef.label}
-            icon={iconDef.icon}
-            onDoubleClick={() => openApp(iconDef.appType)}
-          />
-        ))}
+      <div 
+        className="absolute top-0 left-0 w-full h-[calc(100vh-40px)] z-0 pointer-events-none" 
+        onClick={e => e.stopPropagation()}
+      >
+        {state.desktopIcons.map(iconData => {
+          const iconDef = DESKTOP_ICONS.find(i => i.appType === iconData.appType);
+          if (!iconDef) return null;
+          return (
+            <div key={iconData.id} className="pointer-events-auto">
+              <DesktopIcon
+                label={iconData.label}
+                icon={iconDef.icon}
+                x={iconData.x}
+                y={iconData.y}
+                onDoubleClick={() => openApp(iconData.appType)}
+                onMove={(x, y) => systemBus.emit({ type: 'ICON_MOVE', payload: { id: iconData.id, x, y } })}
+              />
+            </div>
+          );
+        })}
       </div>
 
       {/* Windows Area */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden" onClick={e => e.stopPropagation()}>
+      <div className="absolute top-0 left-0 w-full h-[calc(100vh-30px)] pointer-events-none overflow-hidden" onClick={e => e.stopPropagation()}>
         {state.windows.map(w => {
           const process = state.processes.find(p => p.pid === w.pid);
           if (!process) return null;
@@ -274,10 +285,23 @@ export default function App() {
 
       {/* Taskbar */}
       <div onClick={e => e.stopPropagation()} className="pointer-events-auto absolute bottom-0 w-full z-[9999]">
-        {isStartMenuOpen && <StartMenu onOpenApp={openApp} onClose={() => setIsStartMenuOpen(false)} />}
+        {isStartMenuOpen && (
+          <StartMenu 
+            onOpenApp={openApp} 
+            onRefreshDesktop={() => systemBus.emit({ type: 'SYS_REFRESH' })}
+            onClose={() => setIsStartMenuOpen(false)} 
+          />
+        )}
         <Taskbar
           openWindows={taskbarWindows}
-          onTaskClick={(id) => systemBus.emit({ type: 'WIN_FOCUS', payload: { id } })}
+          onTaskClick={(id) => {
+            const win = state.windows.find(w => w.id === id);
+            if (state.activeWindowId === id && win && !win.isMinimized) {
+              systemBus.emit({ type: 'WIN_MINIMIZE', payload: { id } });
+            } else {
+              systemBus.emit({ type: 'WIN_FOCUS', payload: { id } });
+            }
+          }}
           onStartClick={() => setIsStartMenuOpen(!isStartMenuOpen)}
           isStartMenuOpen={isStartMenuOpen}
         />

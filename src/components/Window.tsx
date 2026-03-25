@@ -45,12 +45,11 @@ export const Window: React.FC<WindowProps> = React.memo(({
     position: 'absolute' as const,
     display: isMinimized ? 'none' : 'block',
     width: isMaximized ? '100%' : 'auto',
-    height: isMaximized ? 'calc(100% - 30px)' : 'auto',
+    height: isMaximized ? '100%' : 'auto',
     top: isMaximized ? 0 : 'auto',
     left: isMaximized ? 0 : 'auto',
   }), [zIndex, isMinimized, isMaximized]);
 
-  if (isMinimized) return null;
 
   return (
     <motion.div
@@ -69,7 +68,7 @@ export const Window: React.FC<WindowProps> = React.memo(({
       className={`pointer-events-auto ${active ? 'z-[100]' : ''}`}
     >
       <Resizable
-        size={isMaximized ? { width: '100%', height: 'calc(100vh - 30px)' } : size}
+        size={isMaximized ? { width: '100%', height: '100%' } : size}
         minWidth={300}
         minHeight={200}
         enable={isMaximized ? false : {
@@ -84,40 +83,40 @@ export const Window: React.FC<WindowProps> = React.memo(({
       >
         {/* Header */}
         <div 
-          className={`window-header h-[30px] ${active ? 'bg-gradient-to-r from-[#0058EE] to-[#378DFF]' : 'bg-[#7A96DF]'} flex items-center justify-between cursor-move select-none p-1 shrink-0`}
+          className={`window-header h-[30px] ${active ? 'bg-gradient-to-r from-[#0058EE] via-[#378DFF] to-[#0058EE]' : 'bg-gradient-to-r from-[#7A96DF] via-[#91AFE9] to-[#7A96DF]'} flex items-center justify-between cursor-move select-none p-1 shrink-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_1px_rgba(0,0,0,0.2)]`}
           onPointerDown={(e) => !isMaximized && dragControls.start(e)}
         >
           <div className="flex items-center gap-1.5 font-bold text-white text-xs px-1 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.6)] font-trebuchet">
             {icon} {title}
           </div>
-            <div className="flex gap-[3px] pr-1 pb-1" onPointerDown={e => e.stopPropagation()}>
+            <div className="flex gap-[2px] pr-[3px] py-[3px]" onPointerDown={e => e.stopPropagation()}>
               <button
                 onClick={onMinimize}
-                className="w-[21px] h-[21px] bg-[#ECE9D8] hover:bg-[#D5D2C1] xp-window-btn flex items-center justify-center focus:outline-none transition-colors border border-white"
+                className="w-[21px] h-[21px] bg-[#ECE9D8] hover:bg-[#D5D2C1] active:bg-[#C1C1C1] xp-window-btn flex items-center justify-center focus:outline-none shadow-[inset_1.5px_1.5px_0px_#fff,inset_-1.5px_-1.5px_0px_rgba(0,0,0,0.1),1px_1px_1px_rgba(0,0,0,0.2)] border border-white/40"
                 title="Minimize"
               >
-                <div className="w-2 h-[3px] bg-black mt-2" />
+                <div className="w-[8px] h-[2px] bg-black translate-y-[3px]" />
               </button>
               <button
                 onClick={onMaximize}
-                className="w-[21px] h-[21px] bg-[#ECE9D8] hover:bg-[#D5D2C1] xp-window-btn flex items-center justify-center focus:outline-none transition-colors border border-white"
+                className="w-[21px] h-[21px] bg-[#ECE9D8] hover:bg-[#D5D2C1] active:bg-[#C1C1C1] xp-window-btn flex items-center justify-center focus:outline-none shadow-[inset_1.5px_1.5px_0px_#fff,inset_-1.5px_-1.5px_0px_rgba(0,0,0,0.1),1px_1px_1px_rgba(0,0,0,0.2)] border border-white/40"
                 title={isMaximized ? "Restore" : "Maximize"}
               >
                 {isMaximized ? (
                   <div className="relative w-[10px] h-[10px]">
-                    <div className="absolute top-0 right-0 w-[8px] h-[8px] border-[2px] border-black border-t-[3px]" />
-                    <div className="absolute bottom-0 left-0 w-[8px] h-[8px] border-[2px] border-black border-t-[3px] bg-[#ECE9D8]" />
+                    <div className="absolute top-0 right-0 w-[7px] h-[7px] border border-black border-t-[2px]" />
+                    <div className="absolute bottom-0 left-0 w-[7px] h-[7px] border border-black border-t-[2px] bg-[#ECE9D8]" />
                   </div>
                 ) : (
-                  <div className="w-[10px] h-[10px] border-[2px] border-black border-t-[3px]" />
+                  <div className="w-[10px] h-[10px] border border-black border-t-[2px]" />
                 )}
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); onClose(); }}
-                className="w-[21px] h-[21px] bg-[#E81123] hover:bg-[#F25056] xp-window-btn flex items-center justify-center focus:outline-none ml-[2px] border border-white"
+                className="w-[21px] h-[21px] bg-[#E81123] hover:bg-[#F25056] active:bg-[#C50000] xp-window-btn-close flex items-center justify-center focus:outline-none shadow-[inset_1.5px_1.5px_0px_rgba(255,255,255,0.4),inset_-1.5px_-1.5px_0px_rgba(0,0,0,0.2),1px_1px_1px_rgba(0,0,0,0.2)] border border-white/20 ml-[1px]"
                 title="Close"
               >
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-[1px_1px_0px_rgba(0,0,0,0.2)]">
+                <svg width="8" height="8" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-[1px_1px_0px_rgba(0,0,0,0.3)]">
                   <path d="M1 1L9 9M9 1L1 9" stroke="white" strokeWidth="2.5" />
                 </svg>
               </button>

@@ -65,6 +65,14 @@ export interface WindowInstance {
   size: { width: number; height: number };
 }
 
+export interface DesktopIconData {
+  id: string;
+  label: string;
+  appType: string;
+  x: number;
+  y: number;
+}
+
 export interface SystemState {
   version: string; // "1.0.0"
   tick: number;
@@ -79,6 +87,7 @@ export interface SystemState {
   currentPath: string; // Normalized Absolute Path
   activeWindowId: string | null;
   bootStatus: 'booting' | 'loading' | 'ready';
+  desktopIcons: DesktopIconData[];
 }
 
 export type SystemEvent =
@@ -101,7 +110,9 @@ export type SystemEvent =
   | { type: 'WIN_MAXIMIZE'; payload: { id: string } }
   | { type: 'WIN_MOVE'; payload: { id: string; x: number; y: number } }
   | { type: 'WIN_RESIZE'; payload: { id: string; width: number; height: number } }
+  | { type: 'ICON_MOVE'; payload: { id: string; x: number; y: number } }
   | { type: 'SYS_LOG'; payload: LogEntry }
   | { type: 'SYS_REBOOT'; payload?: void }
   | { type: 'SYS_IMPORT_STATE'; payload: SystemState }
-  | { type: 'SYS_EXPORT_STATE'; payload?: void };
+  | { type: 'SYS_EXPORT_STATE'; payload?: void }
+  | { type: 'SYS_REFRESH' };

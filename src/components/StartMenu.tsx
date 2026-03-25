@@ -8,10 +8,11 @@ import {
 
 interface StartMenuProps {
   onOpenApp: (appType: string) => void;
+  onRefreshDesktop: () => void;
   onClose: () => void;
 }
 
-export const StartMenu: React.FC<StartMenuProps> = ({ onClose, onOpenApp }) => {
+export const StartMenu: React.FC<StartMenuProps> = ({ onClose, onOpenApp, onRefreshDesktop }) => {
   return (
     <div 
       className="absolute bottom-full left-0 w-[380px] bg-[#1D5ADA] rounded-t-lg shadow-2xl flex flex-col z-[10000] border-t-2 border-l-2 border-r-2 border-[#1B4B1C] overflow-hidden select-none font-tahoma"
@@ -149,6 +150,15 @@ export const StartMenu: React.FC<StartMenuProps> = ({ onClose, onOpenApp }) => {
           <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm">
             <Settings className="text-[#8BA1C1] group-hover:text-white w-6 h-6" />
             <span className="text-[12px]">Control Panel</span>
+          </div>
+          <div 
+            onClick={() => { onRefreshDesktop(); onClose(); }}
+            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm active:translate-y-[px]"
+          >
+             <div className="w-6 h-6 flex items-center justify-center">
+                <div className="w-5 h-5 border-2 border-[#4176CF] group-hover:border-white rounded-full border-t-transparent animate-[spin_3s_linear_infinite]" />
+             </div>
+            <span className="text-[12px] font-bold">Refresh Desktop</span>
           </div>
           <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm">
              <div className="w-6 h-6 bg-[#4176CF] rounded-[2px]" />

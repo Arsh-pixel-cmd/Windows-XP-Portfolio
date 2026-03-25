@@ -9,19 +9,19 @@ interface ProjectsProps {
 
 const PROJECT_LIST = [
   {
-    title: "SmartSpend (Flagship)",
-    description: "AI-Native Expense Tracking System",
-    impact: "Processes 30–50 page financial PDFs in 10–15 seconds with 92–95% accuracy.",
-    tech: ["Next.js", "Supabase", "Gemini AI", "Groq", "Capacitor"],
+    title: "Pennywise (Flagship)",
+    description: "Enterprise-Grade Financial Intelligence Ecosystem",
+    impact: "AI-native orchestration using Groq & Gemini for high-precision extraction.",
+    tech: ["Next.js 16", "Capacitor 8", "Supabase", "Groq AI", "Gemini", "Tailwind"],
     details: [
-      "Async processing pipelines for high-volume PDFs",
-      "AI fallback systems for edge-case data parsing",
-      "Transaction validation layers using multimodal AI",
-      "Cross-platform deployment (Web + Mobile)"
+      "AI-Native Orchestration: Groq & Gemini precision pipelines",
+      "Unified Experience: Next.js 16 + Capacitor 8 native bridge",
+      "Data Sovereignty: Supabase with strict Row Level Security (RLS)",
+      "Native Security: Biometric authentication & system-level intents"
     ],
-    status: "Production-ready (100–500 Beta Users)",
-    github: "#",
-    link: "#"
+    status: "Production-ready (Engineered for Clarity)",
+    github: "https://github.com/Arsh-pixel-cmd/expense-tracker",
+    link: "https://github.com/Arsh-pixel-cmd/expense-tracker"
   },
   {
     title: "HR Nexus (Internship)",
@@ -38,33 +38,34 @@ const PROJECT_LIST = [
     link: "#"
   },
   {
-    title: "Jyotix Astro",
-    description: "AI Astrology Platform",
-    impact: "Multi-language AI conversational agent with integrated payment systems.",
-    tech: ["Next.js", "Firebase", "Gemini", "Razorpay", "i18next"],
+    title: "Jyotix-Astro ✨",
+    description: "AI-Powered Personalized Astrology Guide",
+    impact: "AI-native companion providing dynamic horoscopes and conversational guidance.",
+    tech: ["Next.js", "Firebase", "Gemini AI", "Razorpay", "ShadCN UI", "Framer Motion"],
     details: [
-      "Conversational AI for personalized insights",
-      "Subscription-based Razorpay integration",
-      "Serverless architecture for rapid scaling",
-      "i18n support for EN, Hindi, and Urdu"
+      "AI Astrologer: Personalized guidance via Google Gemini (Genkit)",
+      "Dynamic Horoscopes: Daily/Weekly/Monthly AI-generated insights",
+      "Monetization: Integrated subscription tiers via Razorpay",
+      "Multilingual: Full UI adaptivity for English, Hindi, and Urdu"
     ],
-    status: "Live",
-    github: "#",
-    link: "#"
+    status: "Live & Deployed",
+    github: "https://github.com/Arsh-pixel-cmd/Jyotix-Astro",
+    link: "https://jyotix-astro.vercel.app/"
   },
   {
-    title: "DevLens Ultra",
-    description: "UI Reverse Engineering Extension",
-    impact: "Converts complex browser UI into production React + Tailwind code.",
-    tech: ["JavaScript", "Chrome Extensions API", "Tailwind", "AST"],
+    title: "DevLens Ultra 🔮",
+    description: "Reverse-Engineering design systems & DOM Analysis",
+    impact: "Ultimate browser extension for React codegen and AI-driven technical analysis.",
+    tech: ["JavaScript", "Manifest V3", "Shadow DOM", "React", "Chrome API", "AST"],
     details: [
-      "Maintains 60FPS using requestIdleCallback during parsing",
-      "Filters and converts 300+ native browser styles",
-      "Real-time code generation and preview"
+      "Component Ripper: Zero-noise React codegen and Tailwind mapping",
+      "AI Insight Fusion: LLM-powered layout and logic explainers",
+      "Framework Sniffer: Reads Next.js/React Fiber props in real-time",
+      "Triple-Layer Architecture: Encapsulated Shadow Host for zero CSS bleed"
     ],
-    status: "Open Source",
-    github: "#",
-    link: "#"
+    status: "Open Source & Scalable",
+    github: "https://github.com/Arsh-pixel-cmd/DevLens",
+    link: "https://github.com/Arsh-pixel-cmd/DevLens"
   }
 ];
 
