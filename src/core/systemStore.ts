@@ -18,8 +18,39 @@ const INITIAL_STATE_ICONS = [
   { id: 'notepad', label: 'Notepad.exe', appType: 'notepad', x: 110, y: 20 },
   { id: 'monitor', label: 'SysMon.exe', appType: 'monitor', x: 110, y: 110 },
   { id: 'logviewer', label: 'EventLog.exe', appType: 'logviewer', x: 110, y: 200 },
-  { id: 'resume', label: 'Resume.txt', appType: 'notepad', x: 200, y: 20 },
+  { id: 'resume', label: 'Resume.txt', appType: 'resume', x: 200, y: 20, params: { filePath: 'C:/Users/Arsh/Desktop/Resume.txt' } },
+  { id: 'identity', label: 'Identity.exe', appType: 'identity', x: 200, y: 110 },
+  { id: 'tips', label: 'Hints.exe', appType: 'tips', x: 200, y: 200 },
 ];
+
+const loadInitialIcons = () => {
+  const saved = localStorage.getItem('xp_desktop_icons');
+  if (!saved) return INITIAL_STATE_ICONS;
+  try {
+    const parsed = JSON.parse(saved);
+    if (!Array.isArray(parsed)) return INITIAL_STATE_ICONS;
+    
+    // Merge: Keep saved positions, but take ALL other properties from INITIAL_STATE_ICONS
+    // to ensure params, appType, and labels stay in sync with system updates.
+    const merged = [...parsed];
+    INITIAL_STATE_ICONS.forEach(initial => {
+      const existingIndex = merged.findIndex(m => m.id === initial.id);
+      if (existingIndex === -1) {
+        merged.push(initial);
+      } else {
+        // Keep user's position, update everything else (params, appType, etc.)
+        merged[existingIndex] = {
+          ...initial,
+          x: merged[existingIndex].x,
+          y: merged[existingIndex].y,
+        };
+      }
+    });
+    return merged;
+  } catch {
+    return INITIAL_STATE_ICONS;
+  }
+};
 
 const INITIAL_STATE: SystemState = {
   version: SYSTEM_VERSION,
@@ -35,7 +66,7 @@ const INITIAL_STATE: SystemState = {
   currentPath: 'C:/Users/Arsh',
   activeWindowId: null,
   bootStatus: 'ready',
-  desktopIcons: JSON.parse(localStorage.getItem('xp_desktop_icons') || 'null') || INITIAL_STATE_ICONS
+  desktopIcons: loadInitialIcons()
 };
 
 let currentState: SystemState = INITIAL_STATE;

@@ -71,6 +71,7 @@ export interface DesktopIconData {
   appType: string;
   x: number;
   y: number;
+  params?: Record<string, any>;
 }
 
 export interface SystemState {

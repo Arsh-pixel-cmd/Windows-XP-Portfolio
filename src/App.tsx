@@ -14,7 +14,9 @@ import { Experiments } from './components/Experiments';
 import { Notepad } from './components/Notepad';
 import { SystemMonitor } from './components/SystemMonitor';
 import { LogViewer } from './components/LogViewer';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, User, HelpCircle } from 'lucide-react';
+import { Identity } from './components/Identity';
+import { NavigationTips } from './components/NavigationTips';
 
 // Core
 import { systemStore } from './core/systemStore';
@@ -48,6 +50,7 @@ interface DesktopIconDefinition {
   icon: React.ReactElement;
   appType: string;
   size: { width: number; height: number };
+  params?: Record<string, any>;
 }
 
 export default function App() {
@@ -132,6 +135,27 @@ export default function App() {
       appType: 'logviewer',
       size: { width: 600, height: 400 }
     },
+    {
+      id: 'resume',
+      label: 'Resume.txt',
+      icon: <FileText size={32} className="text-gray-600 drop-shadow-md" fill="#fff" />,
+      appType: 'resume',
+      size: { width: 500, height: 400 }
+    },
+    {
+      id: 'identity',
+      label: 'Identity.exe',
+      icon: <User size={32} className="text-orange-500 drop-shadow-md" fill="#fff" />,
+      appType: 'identity',
+      size: { width: 600, height: 450 }
+    },
+    {
+      id: 'tips',
+      label: 'Hints.exe',
+      icon: <HelpCircle size={32} className="text-blue-500 drop-shadow-md" fill="#fff" />,
+      appType: 'tips',
+      size: { width: 380, height: 480 }
+    },
   ];
 
   const getComponentForApp = (appType: string) => {
@@ -143,18 +167,25 @@ export default function App() {
       case 'terminal': return Terminal;
       case 'contact': return Contact;
       case 'notepad': return Notepad;
+      case 'resume': return Notepad;
+      case 'identity': return Identity;
+      case 'tips': return NavigationTips;
       case 'monitor': return SystemMonitor;
       case 'logviewer': return LogViewer;
       default: return AboutMe;
     }
   };
 
-  const openApp = useCallback((appType: string) => {
+  const openApp = useCallback((appType: string, params?: Record<string, any>) => {
     const iconDef = DESKTOP_ICONS.find(i => i.appType === appType);
     if (iconDef) {
        systemBus.emit({
          type: 'PROC_START',
-         payload: { appType, title: iconDef.label, params: { size: iconDef.size } }
+         payload: { 
+           appType, 
+           title: iconDef.label, 
+           params: { ...iconDef.params, ...params } 
+         }
        });
     }
   }, [DESKTOP_ICONS]);
@@ -167,7 +198,8 @@ export default function App() {
         setTimeout(() => { bootScreen.style.display = 'none'; }, 500);
       }
       openApp('logviewer');
-      setTimeout(() => openApp('about'), 100);
+      setTimeout(() => openApp('identity'), 100);
+      setTimeout(() => openApp('tips'), 300);
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
@@ -237,7 +269,7 @@ export default function App() {
                 icon={iconDef.icon}
                 x={iconData.x}
                 y={iconData.y}
-                onDoubleClick={() => openApp(iconData.appType)}
+                onDoubleClick={() => openApp(iconData.appType, iconData.params)}
                 onMove={(x, y) => systemBus.emit({ type: 'ICON_MOVE', payload: { id: iconData.id, x, y } })}
               />
             </div>
