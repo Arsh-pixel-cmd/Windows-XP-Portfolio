@@ -1,44 +1,65 @@
 import React from 'react';
-import { Mail } from 'lucide-react';
+import { Mail, Github, Linkedin } from 'lucide-react';
 
-export const Contact = () => {
+export const Contact: React.FC = () => {
   return (
-    <div className="flex flex-col h-full bg-[#ECE9D8] p-3 text-sm select-none">
-      <div className="flex items-center gap-4 mb-4 border-b border-[#D5D2C1] pb-3 shadow-[0_1px_0_rgba(255,255,255,0.8)]">
-        <div className="w-12 h-12 bg-gradient-to-br from-[#0058EE] to-[#378DFF] rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-[inset_2px_2px_4px_rgba(255,255,255,0.4),2px_2px_4px_rgba(0,0,0,0.3)] border border-[#0F367A]">
-          <Mail size={24} fill="currentColor" className="text-blue-100" />
-        </div>
-        <div>
-          <h2 className="font-bold text-lg text-black drop-shadow-[1px_1px_0_rgba(255,255,255,0.8)]">Internet Communication</h2>
-          <p className="text-xs text-gray-700">Send a message directly to the developer.</p>
+    <div className="h-full bg-[#ECE9D8] flex flex-col font-tahoma">
+      <div className="p-8 flex-1 overflow-auto">
+        <div className="max-w-md mx-auto bg-white border border-[#7A96DF] p-6 shadow-sm">
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Let’s build something real.</h2>
+          <p className="text-xs text-gray-500 mb-6">Establishing secure connection to Arsh's neural link...</p>
+
+          <div className="space-y-4">
+            <a
+              href="mailto:arshmishra37@gmail.com"
+              className="flex items-center gap-4 p-3 bg-gray-50 border border-gray-100 hover:bg-white hover:border-blue-300 transition-all group"
+            >
+              <div className="w-10 h-10 rounded bg-blue-100 flex items-center justify-center text-blue-600">
+                <Mail size={20} />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Email</p>
+                <p className="text-sm font-bold text-gray-800">arshmishra37@gmail.com</p>
+              </div>
+            </a>
+
+            <div className="grid grid-cols-2 gap-4">
+              <a
+                href="https://github.com/Arsh-pixel-cmd" target="_blank" rel="noreferrer"
+                className="flex flex-col items-center gap-2 p-4 bg-gray-50 border border-gray-100 hover:bg-white hover:border-blue-300 transition-all group text-center"
+              >
+                <Github size={24} className="text-gray-700" />
+                <span className="text-xs font-bold text-gray-600">GitHub</span>
+              </a>
+              <a
+                href="https://www.linkedin.com/in/arsh-mishra-030093325/" target="_blank" rel="noreferrer"
+                className="flex flex-col items-center gap-2 p-4 bg-gray-50 border border-gray-100 hover:bg-white hover:border-blue-300 transition-all group text-center"
+              >
+                <Linkedin size={24} className="text-blue-700" />
+                <span className="text-xs font-bold text-gray-600">LinkedIn</span>
+              </a>
+            </div>
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-gray-100">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Available for</p>
+            <div className="flex flex-wrap gap-2">
+              {['Freelance', 'Internships', 'System Design', 'AI Engineering'].map(tag => (
+                <span key={tag} className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-[10px] font-bold">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col gap-3 px-2">
-        <div className="flex items-center gap-2">
-          <label className="w-[70px] text-right text-black">To:</label>
-          <input type="text" value="Frontend Developer" disabled className="flex-1 px-1.5 py-1 border border-[#7A96DF] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.1)] bg-gray-200 text-gray-600 cursor-not-allowed" />
-        </div>
-        <div className="flex items-center gap-2">
-          <label className="w-[70px] text-right text-black">From:</label>
-          <input type="text" placeholder="Your Email" className="flex-1 px-1.5 py-1 border border-[#7A96DF] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.1)] focus:outline-none focus:border-[#0058EE] focus:ring-1 focus:ring-[#0058EE]" />
-        </div>
-        <div className="flex items-center gap-2">
-          <label className="w-[70px] text-right text-black">Subject:</label>
-          <input type="text" placeholder="Job Offer / Inquiry" className="flex-1 px-1.5 py-1 border border-[#7A96DF] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.1)] focus:outline-none focus:border-[#0058EE] focus:ring-1 focus:ring-[#0058EE]" />
-        </div>
-        <div className="flex flex-col flex-1 gap-1 mt-1">
-          <label className="pl-[78px] text-black">Message:</label>
-          <textarea className="flex-1 ml-[78px] p-2 border border-[#7A96DF] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.1)] focus:outline-none focus:border-[#0058EE] resize-none focus:ring-1 focus:ring-[#0058EE]" />
-        </div>
-      </div>
-
-      <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-[#D5D2C1] shadow-[0_-1px_0_rgba(255,255,255,0.8)_inset]">
-        <button className="min-w-[85px] px-4 py-1.5 bg-[#ECE9D8] border border-gray-400 rounded-[3px] shadow-[inset_1px_1px_1px_rgba(255,255,255,0.8),1px_1px_2px_rgba(0,0,0,0.3)] active:shadow-[inset_1px_1px_2px_rgba(0,0,0,0.4)] active:translate-y-[1px] focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
-          Send
-        </button>
-        <button className="min-w-[85px] px-4 py-1.5 bg-[#ECE9D8] border border-gray-400 rounded-[3px] shadow-[inset_1px_1px_1px_rgba(255,255,255,0.8),1px_1px_2px_rgba(0,0,0,0.3)] active:shadow-[inset_1px_1px_2px_rgba(0,0,0,0.4)] active:translate-y-[1px] focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
+      <div className="bg-[#D4D0C8] p-2 flex justify-end gap-2 border-t border-white">
+        <button className="px-4 py-1 bg-[#ECE9D8] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-500 shadow-sm text-xs font-bold active:border-gray-500 active:border-b-white active:border-r-white min-w-[80px]">
           Cancel
+        </button>
+        <button className="px-4 py-1 bg-[#ECE9D8] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-500 shadow-sm text-xs font-bold active:border-gray-500 active:border-b-white active:border-r-white min-w-[80px]">
+          Send Message
         </button>
       </div>
     </div>

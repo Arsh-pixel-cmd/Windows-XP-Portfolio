@@ -1,93 +1,137 @@
 import React from 'react';
-import { Folder, Image as ImageIcon, FileCode2, Search, CornerUpLeft } from 'lucide-react';
+import { ExternalLink, Github, Rocket } from 'lucide-react';
 
-const projects = [
-  { id: 1, title: 'Winamp Skin', type: 'image' },
-  { id: 2, title: 'Space Cadet Clone', type: 'code' },
-  { id: 3, title: 'Geocities Page', type: 'folder' },
-  { id: 4, title: 'Clippy AI', type: 'code' },
-  { id: 5, title: 'Minesweeper.exe', type: 'code' },
+const PROJECT_LIST = [
+  {
+    title: "SmartSpend (Flagship)",
+    description: "AI-Native Expense Tracking System",
+    impact: "Processes 30–50 page financial PDFs in 10–15 seconds with 92–95% accuracy.",
+    tech: ["Next.js", "Supabase", "Gemini AI", "Groq", "Capacitor"],
+    details: [
+      "Async processing pipelines for high-volume PDFs",
+      "AI fallback systems for edge-case data parsing",
+      "Transaction validation layers using multimodal AI",
+      "Cross-platform deployment (Web + Mobile)"
+    ],
+    status: "Production-ready (100–500 Beta Users)",
+    github: "#",
+    link: "#"
+  },
+  {
+    title: "HR Nexus (Internship)",
+    description: "Enterprise HR SaaS Platform",
+    impact: "Reduced API latency by 30–40% and improved dashboard performance by 25%.",
+    tech: ["Node.js", "Express", "JWT", "RBAC", "PostgreSQL"],
+    details: [
+      "Designed secure JWT-based RBAC authentication",
+      "Optimized payroll and attendance API architectures",
+      "Built scalable backend systems for enterprise load"
+    ],
+    status: "Deployed Internally",
+    github: "#",
+    link: "#"
+  },
+  {
+    title: "Jyotix Astro",
+    description: "AI Astrology Platform",
+    impact: "Multi-language AI conversational agent with integrated payment systems.",
+    tech: ["Next.js", "Firebase", "Gemini", "Razorpay", "i18next"],
+    details: [
+      "Conversational AI for personalized insights",
+      "Subscription-based Razorpay integration",
+      "Serverless architecture for rapid scaling",
+      "i18n support for EN, Hindi, and Urdu"
+    ],
+    status: "Live",
+    github: "#",
+    link: "#"
+  },
+  {
+    title: "DevLens Ultra",
+    description: "UI Reverse Engineering Extension",
+    impact: "Converts complex browser UI into production React + Tailwind code.",
+    tech: ["JavaScript", "Chrome Extensions API", "Tailwind", "AST"],
+    details: [
+      "Maintains 60FPS using requestIdleCallback during parsing",
+      "Filters and converts 300+ native browser styles",
+      "Real-time code generation and preview"
+    ],
+    status: "Open Source",
+    github: "#",
+    link: "#"
+  }
 ];
 
-export const Projects = () => {
+export const Projects: React.FC = () => {
   return (
-    <div className="flex flex-col h-full bg-white select-none">
-      {/* Explorer Toolbar */}
-      <div className="bg-[#ECE9D8] flex flex-col border-b border-[#D5D2C1]">
-        <div className="flex gap-3 px-2 py-0.5 text-xs">
-          <span className="hover:bg-[#316AC5] hover:text-white px-1 cursor-default">File</span>
-          <span className="hover:bg-[#316AC5] hover:text-white px-1 cursor-default">Edit</span>
-          <span className="hover:bg-[#316AC5] hover:text-white px-1 cursor-default">View</span>
-          <span className="hover:bg-[#316AC5] hover:text-white px-1 cursor-default">Favorites</span>
-          <span className="hover:bg-[#316AC5] hover:text-white px-1 cursor-default">Tools</span>
-          <span className="hover:bg-[#316AC5] hover:text-white px-1 cursor-default">Help</span>
+    <div className="h-full bg-white flex flex-col font-tahoma">
+      <div className="bg-[#F0F0E0] p-4 border-b border-[#D4D0C8] flex items-center justify-between shrink-0">
+        <div>
+          <h2 className="text-lg font-bold text-gray-800">C:\Users\Arsh\Documents\Projects</h2>
+          <p className="text-xs text-gray-500">4 objects selected</p>
         </div>
-        <div className="flex items-center gap-4 px-2 py-1 border-t border-white/80 bg-[#ECE9D8] shadow-[0_1px_2px_rgba(0,0,0,0.1)]">
-           <div className="flex items-center gap-1 text-gray-800 hover:text-black cursor-pointer group">
-             <div className="w-8 h-8 rounded-full border border-transparent group-hover:border-gray-400 group-hover:bg-white flex items-center justify-center shadow-sm">
-                <CornerUpLeft size={16} className="text-green-600" />
-             </div>
-             <span className="text-sm">Back</span>
-           </div>
-           <div className="flex items-center gap-1 text-gray-800 hover:text-black cursor-pointer group">
-             <div className="w-8 h-8 rounded-full border border-transparent group-hover:border-gray-400 group-hover:bg-white flex items-center justify-center shadow-sm">
-                <Search size={16} className="text-blue-600" />
-             </div>
-             <span className="text-sm">Search</span>
-           </div>
-           <div className="flex items-center gap-1 text-gray-800 hover:text-black cursor-pointer group">
-             <div className="w-8 h-8 rounded-full border border-transparent group-hover:border-gray-400 group-hover:bg-white flex items-center justify-center shadow-sm">
-                <Folder size={16} className="text-yellow-500" fill="currentColor" />
-             </div>
-             <span className="text-sm">Folders</span>
-           </div>
-        </div>
-        <div className="flex items-center gap-2 px-2 py-1 border-t border-white/80 border-b border-[#D5D2C1] bg-[#ECE9D8]">
-           <span className="text-xs text-gray-600">Address</span>
-           <div className="flex-1 bg-white border border-[#7A96DF] px-2 py-0.5 text-xs flex items-center shadow-[inset_1px_1px_2px_rgba(0,0,0,0.1)]">
-             <Folder size={14} className="text-yellow-500 mr-2" fill="currentColor" /> C:\Documents and Settings\User\My Documents\Projects
-           </div>
+        <div className="flex gap-2">
+           <div className="px-3 py-1 bg-white border border-gray-400 text-xs shadow-sm hover:bg-gray-50 cursor-pointer">View Details</div>
         </div>
       </div>
-      
-      {/* Left pane & Right pane */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Side Pane - Common Tasks */}
-        <div className="w-[200px] bg-gradient-to-b from-[#7BA2E7] to-[#6375D6] hidden md:flex flex-col p-3 gap-3 border-r border-[#7A96DF] overflow-y-auto shadow-[inset_-1px_0_2px_rgba(0,0,0,0.1)]">
-           <div className="bg-white/10 rounded overflow-hidden shadow-[1px_1px_3px_rgba(0,0,0,0.2)] border border-[#7A96DF]">
-             <div className="bg-gradient-to-r from-[#F0F4FA] to-[#D5E1F9] px-2 py-1.5 text-[#0C327D] font-bold text-xs flex justify-between items-center cursor-pointer">
-               File and Folder Tasks
-               <span className="bg-white/50 w-4 h-4 rounded-full flex items-center justify-center text-[10px] shadow-sm">^</span>
-             </div>
-             <div className="p-3 text-white text-xs flex flex-col gap-2.5 bg-[#F6F8FC]">
-               <div className="hover:underline cursor-pointer flex items-center gap-2 text-[#0C327D]">
-                 <Folder size={14} className="text-yellow-500" fill="currentColor" /> Make a new folder
-               </div>
-               <div className="hover:underline cursor-pointer flex items-center gap-2 text-[#0C327D]">
-                 <ImageIcon size={14} className="text-blue-500" /> Publish this folder
-               </div>
-               <div className="hover:underline cursor-pointer flex items-center gap-2 text-[#0C327D]">
-                 <FileCode2 size={14} className="text-gray-500" /> Share this folder
-               </div>
-             </div>
-           </div>
-        </div>
 
-        {/* Content Area */}
-        <div className="flex-1 p-4 bg-white overflow-auto flex content-start flex-wrap gap-6">
-          {projects.map(proj => (
-            <div key={proj.id} className="w-[80px] flex flex-col items-center gap-1 group cursor-pointer">
-              <div className="w-14 h-14 flex items-center justify-center group-hover:bg-blue-500/10 rounded border border-transparent group-hover:border-blue-500/30">
-                {proj.type === 'folder' && <Folder size={48} className="text-yellow-400 drop-shadow-sm" fill="currentColor" />}
-                {proj.type === 'image' && <ImageIcon size={48} className="text-blue-400 drop-shadow-sm" />}
-                {proj.type === 'code' && <FileCode2 size={48} className="text-gray-500 drop-shadow-sm" />}
+      <div className="flex-1 overflow-auto p-4 custom-scrollbar">
+        <div className="grid grid-cols-1 gap-6">
+          {PROJECT_LIST.map((project, idx) => (
+            <div key={idx} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-gradient-to-r from-blue-600 to-blue-400 p-3 text-white flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <Rocket size={16} />
+                  <h3 className="font-bold">{project.title}</h3>
+                </div>
+                <div className="flex gap-2">
+                  <a href={project.github} className="hover:text-blue-200"><Github size={16} /></a>
+                  <a href={project.link} className="hover:text-blue-200"><ExternalLink size={16} /></a>
+                </div>
               </div>
-              <span className="text-[11px] text-center leading-tight group-hover:bg-[#316AC5] group-hover:text-white px-1 rounded line-clamp-2">
-                {proj.title}
-              </span>
+              
+              <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-2 space-y-3">
+                  <div>
+                    <p className="text-sm font-bold text-gray-700">{project.description}</p>
+                    <p className="text-xs text-blue-800 mt-1 font-bold">{project.impact}</p>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Key Engineering</p>
+                    <ul className="text-xs space-y-1">
+                      {project.details.map((detail, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="text-blue-500 mt-0.5">•</span>
+                          <span>{detail}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-3 border-l border-gray-100 flex flex-col gap-3">
+                   <div>
+                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Tech Stack</p>
+                     <div className="flex flex-wrap gap-1 mt-1">
+                       {project.tech.map(t => (
+                         <span key={t} className="px-1.5 py-0.5 bg-white border border-gray-200 text-[10px] rounded leading-none">{t}</span>
+                       ))}
+                     </div>
+                   </div>
+                   <div className="mt-auto">
+                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Status</p>
+                     <p className="text-xs font-bold text-green-700">{project.status}</p>
+                   </div>
+                </div>
+              </div>
             </div>
           ))}
         </div>
+      </div>
+      
+      <div className="bg-[#F0F0E0] px-4 py-1 border-t border-[#D4D0C8] text-[10px] text-gray-600 shrink-0">
+        Ready. Total size: 1.4 TB
       </div>
     </div>
   );

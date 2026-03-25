@@ -1,16 +1,17 @@
 import React from 'react';
 import { 
-  Globe, Mail, MessageSquare, Play, 
+  Globe, Mail,
   Settings, Search, HelpCircle,
-  Power, Folder, FileText, Image as ImageIcon, 
-  Music, Computer, HardDrive
+  Power, Folder, FileText, 
+  Music, Computer, HardDrive, Monitor, FlaskConical
 } from 'lucide-react';
 
 interface StartMenuProps {
   onClose: () => void;
+  onOpenWindow: (id: string) => void;
 }
 
-export const StartMenu: React.FC<StartMenuProps> = ({ onClose }) => {
+export const StartMenu: React.FC<StartMenuProps> = ({ onClose, onOpenWindow }) => {
   return (
     <div 
       className="absolute bottom-full left-0 w-[380px] bg-[#1D5ADA] rounded-t-lg shadow-2xl flex flex-col z-[10000] border-t-2 border-l-2 border-r-2 border-[#1B4B1C] overflow-hidden select-none font-tahoma"
@@ -35,17 +36,25 @@ export const StartMenu: React.FC<StartMenuProps> = ({ onClose }) => {
         {/* Left Column (Programs) */}
         <div className="w-[55%] flex flex-col p-1.5 gap-0.5 border-r border-[#91B2E6]">
           {/* Top Programs */}
-          <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm">
-            <Globe className="text-[#2F71CD] group-hover:text-white w-8 h-8" />
+          <div 
+            onClick={() => { onOpenWindow('terminal'); onClose(); }}
+            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
+          >
+            <div className="bg-black p-1 rounded">
+               <Globe className="text-white w-6 h-6" />
+            </div>
             <div className="flex flex-col">
-              <span className="font-bold text-[13px]">Internet</span>
-              <span className="text-[11px] text-gray-500 group-hover:text-blue-100">Internet Explorer</span>
+              <span className="font-bold text-[13px]">Command Prompt</span>
+              <span className="text-[11px] text-gray-500 group-hover:text-blue-100">cmd.exe</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm">
+          <div 
+            onClick={() => { onOpenWindow('contact'); onClose(); }}
+            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
+          >
             <Mail className="text-[#2F71CD] group-hover:text-white w-8 h-8" />
             <div className="flex flex-col">
-              <span className="font-bold text-[13px]">E-mail</span>
+              <span className="font-bold text-[13px]">Contact Me</span>
               <span className="text-[11px] text-gray-500 group-hover:text-blue-100">Outlook Express</span>
             </div>
           </div>
@@ -53,23 +62,26 @@ export const StartMenu: React.FC<StartMenuProps> = ({ onClose }) => {
           <div className="h-[1px] bg-gray-200 my-1 mx-2" />
 
           {/* Frequent Programs */}
-          <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm">
-            <MessageSquare className="text-orange-500 group-hover:text-white w-8 h-8" />
-            <span className="text-[13px]">MSN</span>
+          <div 
+            onClick={() => { onOpenWindow('projects'); onClose(); }}
+            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
+          >
+            <Folder className="text-yellow-500 group-hover:text-white w-8 h-8" />
+            <span className="text-[13px]">My Portfolio Projects</span>
           </div>
-          <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm">
-            <Play className="text-blue-600 group-hover:text-white w-8 h-8" />
-            <span className="text-[13px]">Windows Media Player</span>
+          <div 
+            onClick={() => { onOpenWindow('systems'); onClose(); }}
+            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
+          >
+            <Monitor className="text-blue-600 group-hover:text-white w-8 h-8" />
+            <span className="text-[13px]">System Architecture</span>
           </div>
-          <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm">
-            <div className="w-8 h-8 flex items-center justify-center">
-               <div className="w-6 h-6 bg-green-500 rounded-full" />
-            </div>
-            <span className="text-[13px]">Windows Messenger</span>
-          </div>
-          <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm">
-             <Globe className="text-gray-400 group-hover:text-white w-8 h-8" />
-            <span className="text-[13px]">Tour Windows XP</span>
+          <div 
+            onClick={() => { onOpenWindow('experiments'); onClose(); }}
+            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
+          >
+             <FlaskConical className="text-purple-500 group-hover:text-white w-8 h-8" />
+            <span className="text-[13px]">Lab Experiments</span>
           </div>
 
           <div className="flex-1" />
@@ -86,28 +98,36 @@ export const StartMenu: React.FC<StartMenuProps> = ({ onClose }) => {
 
         {/* Right Column (Places) */}
         <div className="w-[45%] bg-[#D3E5FA] flex flex-col p-1.5 gap-0.5 border-l border-white shadow-[inset_1px_0_1px_rgba(255,255,255,0.8)]">
-          <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm">
+          <div 
+            onClick={() => { onOpenWindow('projects'); onClose(); }}
+            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
+          >
             <Folder className="text-[#D39943] group-hover:text-white w-6 h-6" />
-            <span className="text-[12px] font-bold">My Documents</span>
+            <span className="text-[12px] font-bold">My Projects</span>
           </div>
-          <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm justify-between pr-4">
-            <div className="flex items-center gap-2">
-              <FileText className="text-[#8BA1C1] group-hover:text-white w-6 h-6" />
-              <span className="text-[12px] font-bold">My Recent Documents</span>
-            </div>
-            <div className="border-l-[4px] border-l-black group-hover:border-l-white border-y-[4px] border-y-transparent" />
+          <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm justify-between pr-4 font-bold opacity-50 italic">
+             <div className="flex items-center gap-2">
+               <FileText className="text-[#8BA1C1] group-hover:text-white w-6 h-6" />
+               <span className="text-[12px]">Recent Docs</span>
+             </div>
           </div>
-          <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm">
-            <ImageIcon className="text-[#4176CF] group-hover:text-white w-6 h-6" />
-            <span className="text-[12px] font-bold">My Pictures</span>
+          <div 
+            onClick={() => { onOpenWindow('experiments'); onClose(); }}
+            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
+          >
+            <FlaskConical className="text-[#4176CF] group-hover:text-white w-6 h-6" />
+            <span className="text-[12px] font-bold">My Lab</span>
           </div>
-          <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm">
+          <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm opacity-50 italic">
             <Music className="text-[#D39943] group-hover:text-white w-6 h-6" />
             <span className="text-[12px] font-bold">My Music</span>
           </div>
-          <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm">
+          <div 
+            onClick={() => { onOpenWindow('systems'); onClose(); }}
+            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
+          >
             <Computer className="text-[#4176CF] group-hover:text-white w-6 h-6" />
-            <span className="text-[12px] font-bold">My Computer</span>
+            <span className="text-[12px] font-bold">My System</span>
           </div>
 
           <div className="h-[1px] bg-[#91B2E6]/50 my-1 mx-2 shadow-[0_1px_0_rgba(255,255,255,0.5)]" />
@@ -118,20 +138,26 @@ export const StartMenu: React.FC<StartMenuProps> = ({ onClose }) => {
           </div>
           <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm">
              <div className="w-6 h-6 bg-[#4176CF] rounded-[2px]" />
-            <span className="text-[12px]">Printers and Faxes</span>
+            <span className="text-[12px]">Printers</span>
           </div>
 
           <div className="h-[1px] bg-[#91B2E6]/50 my-1 mx-2 shadow-[0_1px_0_rgba(255,255,255,0.5)]" />
 
           <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm">
             <HelpCircle className="text-[#4176CF] group-hover:text-white w-6 h-6" />
-            <span className="text-[12px]">Help and Support</span>
+            <span className="text-[12px]">Help</span>
           </div>
-          <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm">
+          <div 
+            onClick={() => { onOpenWindow('terminal'); onClose(); }}
+            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
+          >
             <Search className="text-[#4176CF] group-hover:text-white w-6 h-6" />
             <span className="text-[12px]">Search</span>
           </div>
-          <div className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm">
+          <div 
+            onClick={() => { onOpenWindow('terminal'); onClose(); }}
+            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
+          >
             <HardDrive className="text-[#4176CF] group-hover:text-white w-6 h-6" />
             <span className="text-[12px]">Run...</span>
           </div>

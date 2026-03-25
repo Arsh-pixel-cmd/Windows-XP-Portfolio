@@ -178,4 +178,24 @@
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
+
+  @keyframes xp-boot-progress {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(300%); }
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 12px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-left: 1px solid #d1d1d1;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border: 1px solid #f1f1f1;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+  }
 }
