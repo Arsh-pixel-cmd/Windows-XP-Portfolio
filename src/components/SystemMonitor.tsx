@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cpu, List, XCircle } from 'lucide-react';
+import { Cpu, List } from 'lucide-react';
 import { Process, SystemState } from '../core/types';
 import { systemBus } from '../core/eventBus';
 
@@ -50,10 +50,10 @@ export const SystemMonitor: React.FC<SystemMonitorProps> = ({ systemState }) => 
                   <td className="px-2 py-1 text-center">
                     <button 
                       onClick={() => handleKill(p.pid)}
-                      className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 transition-opacity"
+                      className="opacity-0 group-hover:opacity-100 px-1.5 py-0.5 bg-[#ECE9D8] border border-gray-400 shadow-sm active:shadow-inner active:translate-y-[1px] hover:bg-red-50 text-red-600 font-bold transition-all"
                       title="Terminate Process"
                     >
-                      <XCircle size={14} />
+                      X
                     </button>
                   </td>
                 </tr>

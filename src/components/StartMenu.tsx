@@ -38,7 +38,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({ onClose, onOpenApp }) => {
           {/* Top Programs */}
           <div 
             onClick={() => { onOpenApp('terminal'); onClose(); }}
-            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
+            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm active:translate-y-[1px] active:bg-[#2F71CD]/90 transition-all"
           >
             <div className="bg-black p-1 rounded">
                <Globe className="text-white w-6 h-6" />
@@ -50,7 +50,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({ onClose, onOpenApp }) => {
           </div>
           <div 
             onClick={() => { onOpenApp('contact'); onClose(); }}
-            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
+            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm active:translate-y-[1px] active:bg-[#2F71CD]/90 transition-all"
           >
             <Mail className="text-[#2F71CD] group-hover:text-white w-8 h-8" />
             <div className="flex flex-col">
@@ -102,9 +102,9 @@ export const StartMenu: React.FC<StartMenuProps> = ({ onClose, onOpenApp }) => {
 
           {/* All Programs */}
           <div className="h-[1px] bg-gray-300 my-1" />
-          <div className="flex items-center justify-center gap-2 py-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group">
+          <div className="flex items-center justify-center gap-2 py-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group active:translate-y-[1px] transition-all">
             <span className="font-bold text-[13px]">All Programs</span>
-            <div className="w-4 h-4 bg-green-500 rounded-sm flex items-center justify-center">
+            <div className="w-4 h-4 bg-green-500 rounded-sm flex items-center justify-center shadow-[inset_1px_1px_0px_rgba(255,255,255,0.4)]">
                <div className="border-l-[6px] border-l-white border-y-[4px] border-y-transparent ml-1" />
             </div>
           </div>
@@ -181,22 +181,22 @@ export const StartMenu: React.FC<StartMenuProps> = ({ onClose, onOpenApp }) => {
       {/* Footer */}
       <div className="h-10 bg-gradient-to-r from-[#1D5ADA] via-[#4287F5] to-[#1D5ADA] p-1.5 flex items-center justify-end gap-4 border-t border-[#0A3D91]">
         <button 
-          className="flex items-center gap-1 hover:bg-white/10 px-2 py-0.5 rounded-sm transition-colors group"
+          className="flex items-center gap-1 hover:bg-white/10 active:bg-black/20 px-2 py-0.5 rounded-sm transition-all group active:translate-y-[1px]"
           onClick={onClose}
         >
-          <div className="w-4 h-4 bg-orange-400 rounded-sm flex items-center justify-center">
+          <div className="w-4 h-4 bg-orange-400 rounded-sm flex items-center justify-center shadow-[inset_1px_1px_1px_rgba(255,255,255,0.5)]">
              <div className="w-2 h-2 border-2 border-white rotate-45" />
           </div>
-          <span className="text-white text-[12px] group-hover:underline">Log Off</span>
+          <span className="text-white text-[12px] group-hover:underline font-bold">Log Off</span>
         </button>
         <button 
-          className="flex items-center gap-1 hover:bg-white/10 px-2 py-0.5 rounded-sm transition-colors group"
+          className="flex items-center gap-1 hover:bg-white/10 active:bg-black/20 px-2 py-0.5 rounded-sm transition-all group active:translate-y-[1px]"
           onClick={onClose}
         >
-          <div className="w-4 h-4 bg-red-600 rounded-sm flex items-center justify-center">
+          <div className="w-4 h-4 bg-red-600 rounded-sm flex items-center justify-center shadow-[inset_1px_1px_1px_rgba(255,255,255,0.5)]">
              <Power className="text-white w-3 h-3" />
           </div>
-          <span className="text-white text-[12px] group-hover:underline">Turn Off Computer</span>
+          <span className="text-white text-[12px] group-hover:underline font-bold">Turn Off Computer</span>
         </button>
       </div>
     </div>

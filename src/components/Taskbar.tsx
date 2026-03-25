@@ -45,10 +45,10 @@ export const Taskbar: React.FC<TaskbarProps> = ({ openWindows, onTaskClick, onSt
           <button
             key={w.id}
             onClick={() => onTaskClick(w.id)}
-            className={`flex items-center gap-1.5 px-2 max-w-[150px] min-w-[80px] rounded-[3px] truncate text-xs text-white font-medium shadow-sm transition-all font-tahoma ${
+            className={`flex items-center gap-1.5 px-2 max-w-[150px] min-w-[80px] rounded-[3px] truncate text-xs text-white font-medium shadow-sm transition-all font-tahoma active:translate-y-[1px] ${
           w.active
             ? 'bg-[#124296] border border-[#0F367A] shadow-[inset_1px_1px_3px_rgba(0,0,0,0.5)]'
-            : 'bg-[#3A76DF] hover:bg-[#4882E4] border border-[#528CEF]'
+            : 'bg-[#3A76DF] hover:bg-[#4882E4] border border-[#528CEF] shadow-[inset_1px_1px_1px_rgba(255,255,255,0.2)]'
         }`}
           >
             <span className="w-4 h-4 shrink-0 [&>svg]:w-full [&>svg]:h-full">{w.icon}</span>

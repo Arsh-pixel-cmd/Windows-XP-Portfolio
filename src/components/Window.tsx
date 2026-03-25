@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion, useDragControls } from 'motion/react';
 import { Resizable } from 're-resizable';
-import { X, Square, Minus, Copy } from 'lucide-react';
 
 interface WindowProps {
   id: string;
@@ -91,26 +90,38 @@ export const Window: React.FC<WindowProps> = React.memo(({
           <div className="flex items-center gap-1.5 font-bold text-white text-xs px-1 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.6)] font-trebuchet">
             {icon} {title}
           </div>
-          <div className="flex gap-[2px] pr-0.5 pb-0.5" onPointerDown={e => e.stopPropagation()}>
-            <button
-              onClick={onMinimize}
-              className="w-[21px] h-[21px] bg-[#ECE9D8] hover:bg-[#D5D2C1] border border-white rounded-[3px] shadow-[inset_1px_1px_1px_rgba(255,255,255,0.8),inset_-1px_-1px_1px_rgba(0,0,0,0.2)] flex items-center justify-center focus:outline-none"
-            >
-              <Minus size={12} strokeWidth={3} className="text-black translate-y-[3px]" />
-            </button>
-            <button
-              onClick={onMaximize}
-              className="w-[21px] h-[21px] bg-[#ECE9D8] hover:bg-[#D5D2C1] border border-white rounded-[3px] shadow-[inset_1px_1px_1px_rgba(255,255,255,0.8),inset_-1px_-1px_1px_rgba(0,0,0,0.2)] flex items-center justify-center focus:outline-none"
-            >
-              {isMaximized ? <Copy size={10} strokeWidth={3} className="text-black rotate-180" /> : <Square size={10} strokeWidth={3} className="text-black" />}
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); onClose(); }}
-              className="w-[21px] h-[21px] bg-[#E81123] hover:bg-[#F25056] border border-white rounded-[3px] shadow-[inset_1px_1px_1px_rgba(255,255,255,0.5),inset_-1px_-1px_1px_rgba(0,0,0,0.4)] flex items-center justify-center focus:outline-none ml-[2px]"
-            >
-              <X size={12} strokeWidth={3} className="text-white drop-shadow-[1px_1px_1px_rgba(0,0,0,0.4)]" />
-            </button>
-          </div>
+            <div className="flex gap-[3px] pr-1 pb-1" onPointerDown={e => e.stopPropagation()}>
+              <button
+                onClick={onMinimize}
+                className="w-[21px] h-[21px] bg-[#ECE9D8] hover:bg-[#D5D2C1] xp-window-btn flex items-center justify-center focus:outline-none transition-colors border border-white"
+                title="Minimize"
+              >
+                <div className="w-2 h-[3px] bg-black mt-2" />
+              </button>
+              <button
+                onClick={onMaximize}
+                className="w-[21px] h-[21px] bg-[#ECE9D8] hover:bg-[#D5D2C1] xp-window-btn flex items-center justify-center focus:outline-none transition-colors border border-white"
+                title={isMaximized ? "Restore" : "Maximize"}
+              >
+                {isMaximized ? (
+                  <div className="relative w-[10px] h-[10px]">
+                    <div className="absolute top-0 right-0 w-[8px] h-[8px] border-[2px] border-black border-t-[3px]" />
+                    <div className="absolute bottom-0 left-0 w-[8px] h-[8px] border-[2px] border-black border-t-[3px] bg-[#ECE9D8]" />
+                  </div>
+                ) : (
+                  <div className="w-[10px] h-[10px] border-[2px] border-black border-t-[3px]" />
+                )}
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); onClose(); }}
+                className="w-[21px] h-[21px] bg-[#E81123] hover:bg-[#F25056] xp-window-btn flex items-center justify-center focus:outline-none ml-[2px] border border-white"
+                title="Close"
+              >
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-[1px_1px_0px_rgba(0,0,0,0.2)]">
+                  <path d="M1 1L9 9M9 1L1 9" stroke="white" strokeWidth="2.5" />
+                </svg>
+              </button>
+            </div>
         </div>
         {/* Content */}
         <div className="flex-1 flex flex-col m-1 bg-white border border-[#7A96DF] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.1)] overflow-hidden text-sm font-tahoma" onPointerDown={e => e.stopPropagation()}>

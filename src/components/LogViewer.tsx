@@ -23,12 +23,12 @@ export const LogViewer: React.FC<LogViewerProps> = ({ systemState }) => {
     <div className="flex flex-col h-full bg-[#f0f0f0] font-tahoma text-xs">
       {/* Toolbar */}
       <div className="flex items-center gap-4 p-2 bg-white border-b border-gray-300 shadow-sm">
-        <div className="flex items-center gap-2 bg-gray-100 border border-gray-300 px-2 py-1 rounded">
+        <div className="flex items-center gap-2 bg-white border border-gray-400 px-2 py-0.5 shadow-inner">
           <Search size={14} className="text-gray-500" />
           <input 
             type="text" 
             placeholder="Search logs..." 
-            className="bg-transparent outline-none w-40"
+            className="bg-transparent outline-none w-40 text-xs font-tahoma"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -37,7 +37,7 @@ export const LogViewer: React.FC<LogViewerProps> = ({ systemState }) => {
         <div className="flex items-center gap-2">
           <Filter size={14} className="text-gray-500" />
           <select 
-            className="bg-white border border-gray-300 px-1 py-0.5 outline-none rounded"
+            className="bg-white border border-gray-400 px-1 py-0.5 outline-none text-xs font-tahoma shadow-sm focus:border-blue-500"
             value={filter}
             onChange={(e) => setFilter(e.target.value as any)}
           >

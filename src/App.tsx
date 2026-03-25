@@ -166,7 +166,8 @@ export default function App() {
         bootScreen.style.opacity = '0';
         setTimeout(() => { bootScreen.style.display = 'none'; }, 500);
       }
-      openApp('about');
+      openApp('logviewer');
+      setTimeout(() => openApp('about'), 100);
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
