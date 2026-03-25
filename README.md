@@ -29,18 +29,23 @@ This project demonstrates senior-level systems engineering through several key s
 - **Strict Normalization**: Industrial-grade path resolution and boundary enforcement.
 
 ### 📊 Observability & Replay
-- **Log Correlation**: Every event is traceable via `parentEventId`, allowing for deep auditing of system flows (e.g., tracing a process spawn to its respective file locks).
-- **State Snapshots**: Native support for exporting and importing the entire system state as JSON, with strict version enforcement.
-- **History Replay**: Bounded 500-event history for debugging and simulating past states in an isolated engine.
+- **Log Correlation**: Every event is traceable via `parentEventId`, allowing for deep auditing of system flows.
+- **State Snapshots**: Native support for exporting and importing the entire system state as JSON.
+- **History Replay**: Bounded 500-event history for debugging and simulating past states.
+
+### 🚀 First-Look Optimization (The "3-Second Rule")
+- **Identity Layer (`Identity.exe`)**: An auto-opening window that immediately communicates the architect's value proposition: *Deterministic Systems & AI Orchestration*.
+- **Navigation Assistance (`Hints.exe`)**: Reduces friction for recruiters by providing guided navigation protocols for the OS metaphor.
 
 ---
 
 ## ✨ Integrated Applications
 
 - **💻 cmd.exe**: A functional terminal with low-level commands (`ls`, `ps`, `kill`, `priority`, `crash`, `export`).
-- **📝 Notepad.exe**: Fully integrated with the VFS locking system; opens in read-only mode if a file is already locked.
-- **📈 System Monitor**: Real-time visualization of CPU/Memory jitter and backpressure status.
+- **📝 Notepad.exe**: Fully integrated with the VFS locking system and high-fidelity file binding.
+- **📈 System Monitor**: Real-time visualization of CPU/Memory jitter and hysteresis backpressure status.
 - **🔎 Event Viewer**: High-fidelity log auditing with fuzzy search and level filtering.
+- **🔬 R&D Lab (`Experiments.exe`)**: A technical experimentation log documenting real engineering tradeoffs and R&D pipelines.
 
 ---
 
