@@ -1,5 +1,5 @@
 // src/core/vfs.ts
-import { FileNode } from './types';
+import { FileNode, FileNodeType } from './types';
 
 export class VfsError extends Error {
   constructor(public code: string, message: string) {
@@ -38,26 +38,23 @@ export class PermissionDeniedError extends VfsError {
   }
 }
 
-/**
- * Strictly normalizes a path to an absolute form starting with C:/
- * Idempotent: normalizePath(normalizePath(p)) === normalizePath(p)
- */
-export function normalizePath(path: string): string {
-  // Enforce root
-  let p = path.replace(/\\/g, '/');
-  if (!p.startsWith('C:')) {
-     // If it's a relative path fragment, we assume it's relative to something elsewhere, 
-     // but the internal storage always uses absolute. For now, we'll just handle 
-     // basic normalization. The resolvePath function handles relative joining.
+export class FileLockedError extends VfsError {
+  constructor(path: string, pid: number) {
+    super('ELOCKED', `File is locked by process ${pid}: ${path}`);
   }
-  
+}
+
+const NOW = Date.now();
+
+export function normalizePath(path: string): string {
+  let p = path.replace(/\\/g, '/');
   const parts = p.split('/').filter(Boolean);
   const stack: string[] = [];
   
   for (const part of parts) {
     if (part === '.') continue;
     if (part === '..') {
-      if (stack.length > 1) stack.pop(); // Don't pop C:
+      if (stack.length > 1) stack.pop();
     } else {
       stack.push(part);
     }
@@ -66,66 +63,56 @@ export function normalizePath(path: string): string {
   return stack.join('/');
 }
 
-/**
- * Joins and normalizes paths.
- */
 export function joinPath(base: string, target: string): string {
   if (target.startsWith('C:')) return normalizePath(target);
   return normalizePath(`${base}/${target}`);
 }
 
+const createNode = (name: string, type: FileNodeType, content?: string, readonly?: boolean): FileNode => ({
+  name,
+  type,
+  content,
+  readonly,
+  createdAt: NOW,
+  updatedAt: NOW,
+  children: type === 'directory' ? [] : undefined
+});
+
 export const INITIAL_FS: FileNode = {
-  name: 'C:',
-  type: 'directory',
-  readonly: true,
+  ...createNode('C:', 'directory', undefined, true),
   children: [
     {
-      name: 'Users',
-      type: 'directory',
+      ...createNode('Users', 'directory'),
       children: [
         {
-          name: 'Arsh',
-          type: 'directory',
+          ...createNode('Arsh', 'directory'),
           children: [
             {
-              name: 'Documents',
-              type: 'directory',
+              ...createNode('Documents', 'directory'),
               children: [
                 {
-                  name: 'Resume.txt',
-                  type: 'file',
-                  content: 'Arsh Mishra - Senior Software Engineer\nSystems Architect | Full-Stack Developer'
+                  ...createNode('Resume.txt', 'file', 'Arsh Mishra - Senior Software Engineer\nSystems Architect | Full-Stack Developer'),
                 }
               ]
             },
             {
-              name: 'Desktop',
-              type: 'directory',
-              children: []
+              ...createNode('Desktop', 'directory'),
             }
           ]
         }
       ]
     },
     {
-      name: 'System',
-      type: 'directory',
-      readonly: true,
+      ...createNode('System', 'directory', undefined, true),
       children: [
         {
-          name: 'logs.txt',
-          type: 'file',
-          readonly: true,
-          content: '[INFO] System Kernel initialized\n'
+          ...createNode('logs.txt', 'file', '[INFO] System Kernel initialized\n', true),
         }
       ]
     }
   ]
 };
 
-/**
- * Primary interface: resolve a path to a Node. Throws if not found.
- */
 export function resolvePath(fs: FileNode, path: string): FileNode {
   const normalized = normalizePath(path);
   const parts = normalized.split('/').filter(Boolean);
@@ -144,8 +131,23 @@ export function resolvePath(fs: FileNode, path: string): FileNode {
 }
 
 /**
- * Pure transformation: returns a new FS tree with the change.
+ * Pure transformation helpers
  */
+function updateInternal(node: FileNode, pathParts: string[], transform: (node: FileNode) => FileNode): FileNode {
+  if (pathParts.length === 0 || (pathParts.length === 1 && pathParts[0] === 'C:' && node.name === 'C:')) {
+    return transform(node);
+  }
+
+  const [current, ...rest] = pathParts[0] === 'C:' ? pathParts.slice(1) : pathParts;
+  const childIndex = node.children?.findIndex(c => c.name === current);
+  if (childIndex === -1 || childIndex === undefined) throw new FileNotFoundError(current);
+
+  const newChildren = [...(node.children || [])];
+  newChildren[childIndex] = updateInternal(newChildren[childIndex], rest, transform);
+
+  return { ...node, children: newChildren, updatedAt: Date.now() };
+}
+
 export function createFile(root: FileNode, path: string, content: string = ''): FileNode {
   const normalized = normalizePath(path);
   const pParts = normalized.split('/').filter(Boolean);
@@ -157,7 +159,7 @@ export function createFile(root: FileNode, path: string, content: string = ''): 
     
     return {
       ...parent,
-      children: [...(parent.children || []), { name: fileName, type: 'file', content }]
+      children: [...(parent.children || []), createNode(fileName, 'file', content)]
     };
   });
 }
@@ -173,37 +175,60 @@ export function createDirectory(root: FileNode, path: string): FileNode {
     
     return {
       ...parent,
-      children: [...(parent.children || []), { name: dirName, type: 'directory', children: [] }]
+      children: [...(parent.children || []), createNode(dirName, 'directory')]
     };
   });
 }
 
-export function writeFile(root: FileNode, path: string, content: string): FileNode {
+export function writeFile(root: FileNode, path: string, content: string, pid?: number): FileNode {
   const normalized = normalizePath(path);
   const pParts = normalized.split('/').filter(Boolean);
   
   return updateInternal(root, pParts, (node) => {
     if (node.readonly) throw new PermissionDeniedError(path);
-    if (node.type !== 'file') throw new PermissionDeniedError(path); // Cannot "write" to directory
-    return { ...node, content };
+    if (node.type !== 'file') throw new PermissionDeniedError(path);
+    if (node.lockedBy && node.lockedBy !== pid) throw new FileLockedError(path, node.lockedBy);
+    
+    return { ...node, content, updatedAt: Date.now() };
   });
+}
+
+export function setLock(root: FileNode, path: string, pid: number | undefined): FileNode {
+  const normalized = normalizePath(path);
+  const pParts = normalized.split('/').filter(Boolean);
+  
+  return updateInternal(root, pParts, (node) => {
+    if (node.type !== 'file') throw new PermissionDeniedError(path);
+    if (pid && node.lockedBy && node.lockedBy !== pid) throw new FileLockedError(path, node.lockedBy);
+    return { ...node, lockedBy: pid };
+  });
+}
+
+export function releaseAllLocks(node: FileNode, pid: number): FileNode {
+  if (node.lockedBy === pid) {
+    node = { ...node, lockedBy: undefined };
+  }
+  if (node.children) {
+    return {
+      ...node,
+      children: node.children.map(c => releaseAllLocks(c, pid))
+    };
+  }
+  return node;
 }
 
 export function deleteNode(root: FileNode, path: string): FileNode {
   const normalized = normalizePath(path);
   if (normalized === 'C:') throw new PermissionDeniedError('Cannot delete root');
-  
   const pParts = normalized.split('/').filter(Boolean);
   const targetName = pParts.pop()!;
   
   return updateInternal(root, pParts, (parent) => {
-    if (parent.readonly) throw new PermissionDeniedError(path);
     const target = parent.children?.find(c => c.name === targetName);
     if (!target) throw new FileNotFoundError(path);
     if (target.readonly) throw new PermissionDeniedError(path);
-    if (target.type === 'directory' && (target.children?.length || 0) > 0) {
-      throw new DirectoryNotEmptyError(path);
-    }
+    if (target.lockedBy) throw new FileLockedError(path, target.lockedBy);
+    if (target.type === 'directory' && (target.children?.length || 0) > 0) throw new DirectoryNotEmptyError(path);
     
     return {
       ...parent,
@@ -213,24 +238,13 @@ export function deleteNode(root: FileNode, path: string): FileNode {
 }
 
 export function moveNode(root: FileNode, from: string, to: string): FileNode {
-  const srcNorm = normalizePath(from);
-  const destNorm = normalizePath(to);
-  
-  if (srcNorm === 'C:') throw new PermissionDeniedError('Cannot move root');
-  if (destNorm.startsWith(srcNorm)) throw new PermissionDeniedError('Cannot move directory into itself');
-  
-  const srcNode = resolvePath(root, srcNorm);
-  
-  // 1. Remove from source
+  const srcNode = resolvePath(root, from);
+  if (srcNode.lockedBy) throw new FileLockedError(from, srcNode.lockedBy);
   const fsWithoutNode = deleteNode(root, from);
+  const destParts = normalizePath(to).split('/').filter(Boolean);
   
-  // 2. Add to destination
-  const destParts = destNorm.split('/').filter(Boolean);
   return updateInternal(fsWithoutNode, destParts, (destParent) => {
     if (destParent.type !== 'directory') throw new NotADirectoryError(to);
-    if (destParent.readonly) throw new PermissionDeniedError(to);
-    if (destParent.children?.some(c => c.name === srcNode.name)) throw new FileAlreadyExistsError(`${to}/${srcNode.name}`);
-    
     return {
       ...destParent,
       children: [...(destParent.children || []), srcNode]
@@ -238,51 +252,14 @@ export function moveNode(root: FileNode, from: string, to: string): FileNode {
   });
 }
 
-/**
- * Private helper for immutable deep updates.
- */
-function updateInternal(node: FileNode, pathParts: string[], transform: (node: FileNode) => FileNode): FileNode {
-  if (pathParts.length === 0 || (pathParts.length === 1 && pathParts[0] === 'C:' && node.name === 'C:')) {
-    return transform(node);
-  }
-
-  const [current, ...rest] = pathParts[0] === 'C:' ? pathParts.slice(1) : pathParts;
-  
-  const childIndex = node.children?.findIndex(c => c.name === current);
-  if (childIndex === -1 || childIndex === undefined) throw new FileNotFoundError(current);
-
-  const newChildren = [...(node.children || [])];
-  newChildren[childIndex] = updateInternal(newChildren[childIndex], rest, transform);
-
-  return { ...node, children: newChildren };
-}
-
-/**
- * UI Helper: Returns names of children.
- */
 export function listDirectory(root: FileNode, path: string): string[] {
   const node = resolvePath(root, path);
   if (node.type !== 'directory') throw new NotADirectoryError(path);
   return node.children?.map(c => c.name) || [];
 }
 
-/**
- * UI Helper: Returns file content.
- */
 export function readContent(root: FileNode, path: string): string {
   const node = resolvePath(root, path);
-  if (node.type !== 'file') throw new PermissionDeniedError(path);
+  if (node.type === 'directory') throw new PermissionDeniedError(path);
   return node.content || '';
-}
-
-/**
- * Checks if a path points to a directory.
- */
-export function isDirectory(root: FileNode, path: string): boolean {
-  try {
-    const node = resolvePath(root, path);
-    return node.type === 'directory';
-  } catch {
-    return false;
-  }
 }

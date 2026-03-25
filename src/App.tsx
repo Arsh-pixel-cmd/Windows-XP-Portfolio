@@ -13,6 +13,8 @@ import { Terminal } from './components/Terminal';
 import { Experiments } from './components/Experiments';
 import { Notepad } from './components/Notepad';
 import { SystemMonitor } from './components/SystemMonitor';
+import { LogViewer } from './components/LogViewer';
+import { AlertTriangle } from 'lucide-react';
 
 // Core
 import { systemStore } from './core/systemStore';
@@ -57,6 +59,14 @@ export default function App() {
     const unsub = systemStore.subscribe(setState);
     return () => { unsub(); };
   }, []);
+
+  const LogIcon = ({ size, className }: any) => (
+    <div className={`p-1 bg-white border border-gray-400 rounded-sm ${className}`}>
+      <div className="w-full h-full bg-blue-100 flex items-center justify-center">
+        <Monitor size={size - 8} />
+      </div>
+    </div>
+  );
 
   const DESKTOP_ICONS: DesktopIconDefinition[] = [
     {
@@ -115,6 +125,13 @@ export default function App() {
       appType: 'monitor',
       size: { width: 400, height: 500 }
     },
+    {
+      id: 'logviewer',
+      label: 'EventLog.exe',
+      icon: <LogIcon size={32} className="text-blue-600 drop-shadow-md" fill="#fff" />,
+      appType: 'logviewer',
+      size: { width: 600, height: 400 }
+    },
   ];
 
   const getComponentForApp = (appType: string) => {
@@ -127,6 +144,7 @@ export default function App() {
       case 'contact': return Contact;
       case 'notepad': return Notepad;
       case 'monitor': return SystemMonitor;
+      case 'logviewer': return LogViewer;
       default: return AboutMe;
     }
   };
@@ -178,6 +196,16 @@ export default function App() {
       <div id="boot-screen" className="transition-opacity duration-500 z-[10000] absolute inset-0">
         <BootScreen />
       </div>
+
+      {/* Overload Indicator */}
+      {state.resources.isBlocked && (
+        <div className="fixed top-4 right-4 z-[9999] animate-pulse">
+          <div className="bg-red-600 text-white px-4 py-2 rounded shadow-lg flex items-center gap-2 border-2 border-white font-bold text-sm">
+            <AlertTriangle size={18} />
+            SYSTEM OVERLOADED: BACKPRESSURE ACTIVE
+          </div>
+        </div>
+      )}
 
       {/* Context Menu */}
       {contextMenu && (

@@ -1,36 +1,67 @@
 // src/core/processManager.ts
-import { Process, SystemResources } from './types';
+import { Process, SystemResources, SystemState } from './types';
 
-export const SYSTEM_LIMITS = {
-  MAX_MEMORY: 1024, // 1GB
-  MAX_PROCESSES: 20,
-  BASE_MEMORY_USAGE: 124, // System kernel base memory
+const PRIORITY_WEIGHTS = {
+  LOW: 0.5,
+  NORMAL: 1.0,
+  HIGH: 2.0
 };
 
 /**
- * Computes deterministic resource usage for the current state.
- * CPU uses a sin-wave jitter model: base + sin(tick/5) * variance
+ * Computes deterministic resource usage with priority awareness.
+ * Memory > 95% triggers potential crashes in shouldProcessCrash.
  */
-export function computeResources(processes: Process[], tick: number): SystemResources {
-  const totalMemory = processes.reduce((acc, p) => acc + p.memory, SYSTEM_LIMITS.BASE_MEMORY_USAGE);
-  
-  const totalCpu = processes.reduce((acc, p) => {
-    if (p.status !== 'running') return acc;
-    // Each process has a base CPU and a jitter
-    const base = p.cpu;
-    const jitter = Math.sin((tick + p.pid) / 5) * 2;
-    return acc + Math.max(0.5, base + jitter);
-  }, 2); // 2% base system load
+export function computeResources(processes: Process[], tick: number, lastState?: SystemState): SystemResources {
+  const baseCpu = 2; // Kernel overhead
+  const baseMem = 124;
+
+  const totalCpuMultiplier = processes.reduce((acc, p) => 
+    acc + (p.status === 'running' ? PRIORITY_WEIGHTS[p.priority] : 0), 0
+  );
+
+  const cpuLoad = Math.min(100, baseCpu + totalCpuMultiplier * 5 + Math.sin(tick / 5) * 3);
+  const memoryUsage = processes.reduce((acc, p) => acc + p.memory, baseMem);
+
+  // Hysteresis calculation for backpressure
+  let isBlocked = lastState?.resources.isBlocked || false;
+  if (cpuLoad > 90) isBlocked = true;
+  if (cpuLoad < 75) isBlocked = false;
 
   return {
-    cpuLoad: Math.min(100, totalCpu),
-    memoryUsage: totalMemory
+    cpuLoad,
+    memoryUsage,
+    isOverloaded: cpuLoad > 85 || (memoryUsage / 16384) > 0.85,
+    isBlocked
   };
 }
 
 /**
- * Creates a new process instance with initial resource allocation.
+ * Enforces system limits with backpressure.
  */
+export function validateSystemLimits(state: SystemState) {
+  if (state.resources.isBlocked) {
+    throw new Error('System overloaded: Process creation suspended (Backpressure active)');
+  }
+  if (state.processes.length >= 20) {
+    throw new Error('Maximum process limit reached (20)');
+  }
+}
+
+/**
+ * Deterministic Crash Simulator with Cooldown
+ */
+export function shouldProcessCrash(state: SystemState, process: Process): boolean {
+  if (process.status !== 'running') return false;
+  
+  const memoryPercent = (state.resources.memoryUsage / 16384) * 100;
+  
+  // Rule: Memory > 95% AND Tick Periodicity AND Cooldown (20 ticks)
+  if (memoryPercent > 95 && state.tick % 10 === 0 && (state.tick - state.lastCrashTick) > 20) {
+    return true;
+  }
+  return false;
+}
+
 export function createProcessInstance(
   pid: number, 
   name: string, 
@@ -43,29 +74,12 @@ export function createProcessInstance(
     name,
     appType,
     status: 'running',
-    memory: 40 + Math.random() * 40, // Initial allocation
-    cpu: 2 + Math.random() * 5,     // Base CPU load
     createdAt: Date.now(),
+    cpu: 2, 
+    memory: 40 + Math.random() * 60,
+    priority: params?.priority || 'NORMAL',
     cpuTime: 0,
     windowId,
     params
   };
-}
-
-export class ResourceLimitError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ResourceLimitError';
-  }
-}
-
-export function validateSystemLimits(processes: Process[]) {
-  if (processes.length >= SYSTEM_LIMITS.MAX_PROCESSES) {
-    throw new ResourceLimitError('Maximum process limit reached');
-  }
-  
-  const currentMem = processes.reduce((acc, p) => acc + p.memory, SYSTEM_LIMITS.BASE_MEMORY_USAGE);
-  if (currentMem > SYSTEM_LIMITS.MAX_MEMORY * 0.9) {
-    throw new ResourceLimitError('System low on memory');
-  }
 }
