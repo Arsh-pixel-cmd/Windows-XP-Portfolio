@@ -3,7 +3,7 @@ import {
   Globe, Mail,
   Settings, Search, HelpCircle,
   Power, Folder, FileText, 
-  Music, Computer, HardDrive, Monitor, FlaskConical
+  Music, Computer, HardDrive, Monitor, FlaskConical, Cpu
 } from 'lucide-react';
 
 interface StartMenuProps {
@@ -82,6 +82,20 @@ export const StartMenu: React.FC<StartMenuProps> = ({ onClose, onOpenWindow }) =
           >
              <FlaskConical className="text-purple-500 group-hover:text-white w-8 h-8" />
             <span className="text-[13px]">Lab Experiments</span>
+          </div>
+          <div 
+            onClick={() => { onOpenWindow('notepad'); onClose(); }}
+            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
+          >
+             <FileText className="text-gray-500 group-hover:text-white w-8 h-8" />
+            <span className="text-[13px]">Notepad</span>
+          </div>
+          <div 
+            onClick={() => { onOpenWindow('monitor'); onClose(); }}
+            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
+          >
+             <Cpu className="text-green-600 group-hover:text-white w-8 h-8" />
+            <span className="text-[13px]">System Monitor</span>
           </div>
 
           <div className="flex-1" />
