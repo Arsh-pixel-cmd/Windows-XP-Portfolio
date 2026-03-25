@@ -85,7 +85,7 @@ export type SystemEvent =
   | { type: 'TICK'; payload: { tick: number; timestamp: number } }
   | { type: 'FS_CREATE_FILE'; payload: { path: string; content?: string } }
   | { type: 'FS_CREATE_DIR'; payload: { path: string } }
-  | { type: 'FS_WRITE'; payload: { path: string; content: string } }
+  | { type: 'FS_WRITE'; payload: { path: string; content: string; pid?: number } }
   | { type: 'FS_DELETE'; payload: { path: string } }
   | { type: 'FS_MOVE'; payload: { from: string; to: string } }
   | { type: 'FS_RENAME'; payload: { path: string; newName: string } }
@@ -94,6 +94,7 @@ export type SystemEvent =
   | { type: 'FS_UNLOCK'; payload: { path: string; pid: number } }
   | { type: 'PROC_START'; payload: { appType: string; title: string; priority?: 'LOW' | 'NORMAL' | 'HIGH'; params?: any } }
   | { type: 'PROC_KILL'; payload: { pid: number } }
+  | { type: 'PROC_PRIORITY'; payload: { pid: number; priority: 'LOW' | 'NORMAL' | 'HIGH' } }
   | { type: 'PROC_CRASH'; payload: { pid: number; reason: string } }
   | { type: 'WIN_FOCUS'; payload: { id: string } }
   | { type: 'WIN_MINIMIZE'; payload: { id: string } }

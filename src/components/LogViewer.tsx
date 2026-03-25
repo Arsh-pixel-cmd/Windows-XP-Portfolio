@@ -1,7 +1,7 @@
 // src/components/LogViewer.tsx
 import React, { useState } from 'react';
 import { SystemState } from '../core/types';
-import { Search, Filter, Terminal as LogIcon, AlertTriangle, Info, AlertCircle } from 'lucide-react';
+import { Search, Filter, AlertTriangle, Info, AlertCircle } from 'lucide-react';
 
 interface LogViewerProps {
   systemState: SystemState;

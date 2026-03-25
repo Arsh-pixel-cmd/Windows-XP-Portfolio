@@ -1,7 +1,7 @@
 // src/core/systemStore.ts
 import { SystemState, SystemEvent } from './types';
 import { systemBus } from './eventBus';
-import { INITIAL_FS, normalizePath, createFile, createDirectory, writeFile, joinPath, setLock, releaseAllLocks } from './vfs';
+import { INITIAL_FS, normalizePath, createFile, createDirectory, writeFile, joinPath, setLock, releaseAllLocks, deleteNode } from './vfs';
 import { computeResources, createProcessInstance, validateSystemLimits, shouldProcessCrash } from './processManager';
 import { log } from './logger';
 import { systemScheduler } from './scheduler';
@@ -69,13 +69,14 @@ export const systemStore = {
 };
 
 function validateEvent(event: SystemEvent, state: SystemState) {
+  const e = event as any;
   switch (event.type) {
     case 'PROC_START':
       validateSystemLimits(state);
       break;
     case 'SYS_IMPORT_STATE':
-      if (event.payload.version !== SYSTEM_VERSION) {
-        throw new Error(`Incompatible system version: ${event.payload.version}`);
+      if (e.payload.version !== SYSTEM_VERSION) {
+        throw new Error(`Incompatible system version: ${e.payload.version}`);
       }
       break;
   }
@@ -126,6 +127,15 @@ function kernelReducer(state: SystemState, event: SystemEvent): SystemState {
       };
     }
 
+    case 'PROC_PRIORITY': {
+      return {
+        ...state,
+        processes: state.processes.map(p => 
+          p.pid === event.payload.pid ? { ...p, priority: event.payload.priority } : p
+        )
+      };
+    }
+
     case 'PROC_KILL':
     case 'PROC_CRASH': {
       const pid = event.payload.pid;
@@ -172,6 +182,9 @@ function kernelReducer(state: SystemState, event: SystemEvent): SystemState {
     case 'SYS_IMPORT_STATE':
       systemScheduler.reset(event.payload.tick);
       return { ...event.payload, startTime: Date.now() - event.payload.tick * 1000 };
+
+    case 'SYS_EXPORT_STATE':
+      return state; // No-op for state mutation, handled by logger in dispatch
 
     case 'SYS_REBOOT':
       systemScheduler.reset(0);

@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Process, SystemState } from '../core/types';
+import { SystemState } from '../core/types';
 import { systemBus } from '../core/eventBus';
 import { listDirectory, readContent } from '../core/vfs';
 
 interface TerminalProps {
-  process: Process;
   systemState: SystemState;
 }
 
@@ -37,7 +36,22 @@ export const Terminal: React.FC<TerminalProps> = ({ systemState }) => {
 
     switch (cmd) {
       case 'help':
-        setHistory(prev => [...prev, 'Available commands:', '  ls [path]      List files', '  cd <path>      Change directory', '  cat <file>     Read file content', '  mkdir <name>   Create directory', '  touch <name>   Create file', '  rm <path>      Delete file/empty dir', '  ps             List processes', '  kill <pid>     Stop process', '  clear          Clear screen', '  whoami         Identity']);
+        setHistory(prev => [...prev, 
+          'Available commands:', 
+          '  ls [path]      List files', 
+          '  cd <path>      Change directory', 
+          '  cat <file>     Read file content', 
+          '  mkdir <name>   Create directory', 
+          '  touch <name>   Create file', 
+          '  rm <path>      Delete file/empty dir', 
+          '  ps             List processes', 
+          '  kill <pid>     Stop process', 
+          '  priority <pid> <L|N|H>  Set process priority',
+          '  crash <pid>    Force deterministic crash',
+          '  export         Export system state snapshot',
+          '  clear          Clear screen', 
+          '  whoami         Identity'
+        ]);
         break;
       case 'clear':
         setHistory([]);
@@ -104,6 +118,37 @@ export const Terminal: React.FC<TerminalProps> = ({ systemState }) => {
         const pid = parseInt(args[0]);
         if (!isNaN(pid)) systemBus.emit({ type: 'PROC_KILL', payload: { pid } });
         else setHistory(prev => [...prev, 'Usage: kill <pid>']);
+        break;
+      }
+      case 'priority': {
+        const pid = parseInt(args[0]);
+        const level = args[1]?.toUpperCase();
+        const map: Record<string, 'LOW' | 'NORMAL' | 'HIGH'> = { L: 'LOW', N: 'NORMAL', H: 'HIGH' };
+        if (!isNaN(pid) && map[level]) {
+          systemBus.emit({ type: 'PROC_PRIORITY', payload: { pid, priority: map[level] } });
+        } else {
+          setHistory(prev => [...prev, 'Usage: priority <pid> <L|N|H>']);
+        }
+        break;
+      }
+      case 'crash': {
+        const pid = parseInt(args[0]);
+        if (!isNaN(pid)) {
+          systemBus.emit({ type: 'PROC_CRASH', payload: { pid, reason: 'Manual override: SIGSEGV' } });
+        } else {
+          setHistory(prev => [...prev, 'Usage: crash <pid>']);
+        }
+        break;
+      }
+      case 'export': {
+        const state = JSON.stringify(systemState, null, 2);
+        const blob = new Blob([state], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `xp_state_v${systemState.version}_${Date.now()}.json`;
+        a.click();
+        setHistory(prev => [...prev, 'System state exported to JSON.']);
         break;
       }
       default:

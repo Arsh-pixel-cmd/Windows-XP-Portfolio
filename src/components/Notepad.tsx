@@ -11,25 +11,54 @@ interface NotepadProps {
 export const Notepad: React.FC<NotepadProps> = ({ process, systemState }) => {
   const [content, setContent] = useState('');
   const [filePath] = useState(process.params?.filePath || 'C:/Users/Arsh/Documents/note.txt');
+  const [isReadOnly, setIsReadOnly] = useState(false);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (process.params?.filePath) {
+    if (filePath) {
       try {
-        const file = resolvePath(systemState.fileSystem, process.params.filePath);
+        const file = resolvePath(systemState.fileSystem, filePath);
         if (file.type === 'file') {
           setContent(file.content || '');
+          
+          // Try to lock the file
+          if (file.lockedBy && file.lockedBy !== process.pid) {
+            setIsReadOnly(true);
+            systemBus.emit({
+              type: 'SYS_LOG',
+              payload: { 
+                id: `lock-${Date.now()}`,
+                timestamp: Date.now(),
+                level: 'WARN', 
+                message: `File ${filePath} is locked by PID ${file.lockedBy}. Opening in read-only mode.` 
+              }
+            });
+          } else {
+            systemBus.emit({
+              type: 'FS_LOCK',
+              payload: { path: filePath, pid: process.pid }
+            });
+          }
         }
       } catch (e) {
         console.error('Failed to load file into notepad', e);
       }
     }
-  }, [process.params?.filePath, systemState.fileSystem]);
+
+    return () => {
+      // Release lock on unmount
+      systemBus.emit({
+        type: 'FS_UNLOCK',
+        payload: { path: filePath, pid: process.pid }
+      });
+    };
+  }, [filePath, process.pid, systemState.fileSystem]);
 
   const handleSave = () => {
+    if (isReadOnly) return;
     systemBus.emit({
       type: 'FS_WRITE',
-      payload: { path: filePath, content }
+      payload: { path: filePath, content, pid: process.pid }
     });
   };
 
@@ -82,7 +111,8 @@ export const Notepad: React.FC<NotepadProps> = ({ process, systemState }) => {
         value={content}
         onChange={(e) => setContent(e.target.value)}
         onKeyDown={handleKeyDown}
-        className="flex-1 p-1 resize-none focus:outline-none font-mono text-sm leading-tight text-black selection:bg-[#316AC5] selection:text-white"
+        readOnly={isReadOnly}
+        className={`flex-1 p-1 resize-none focus:outline-none font-mono text-sm leading-tight text-black selection:bg-[#316AC5] selection:text-white ${isReadOnly ? 'bg-gray-50 text-gray-600' : 'bg-white'}`}
         spellCheck={false}
       />
     </div>
