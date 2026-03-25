@@ -97,6 +97,69 @@ export const INITIAL_FS: FileNode = {
             },
             {
               ...createNode('Desktop', 'directory'),
+              children: [
+                {
+                  ...createNode('Resume.txt', 'file', `**ARSH MISHRA**
++91 9519217700 | arshmishra37@gmail.com
+LinkedIn: linkedin.com/in/arsh-mishra-030093325
+GitHub: github.com/Arsh-pixel-cmd
+
+**EDUCATION**
+- **B.Tech in Computer Science**, IILM University | 2024 – 2028 (Expected) | **9.32 / 10 CGPA**
+- **Intermediate (12th)**, CBSE | 2024 | 61%
+- **High School (10th)**, ICSE | 2022 | 75%
+
+**WORK EXPERIENCE**
+**Full-Stack Developer Intern** | SGCA Technologies Pvt. Ltd., Greater Noida | Mar 2025 – May 2025
+- Engineered HR Nexus, an enterprise-grade HR SaaS platform with JWT authentication and Role-Based Access Control (RBAC).
+- Developed robust REST APIs for payroll management, automated attendance, and leave approval workflows using Node.js/Express.
+- Optimized backend efficiency, reducing API response times by 30–40% through query optimization and caching.
+- Enhanced frontend performance, improving dashboard load times by 25%.
+
+**PROJECTS**
+**SmartSpend – AI Expense Management System** | Mar 2026 (Play Store Launch: Mid March 2026)
+- Built a cross-platform AI-native expense tracker using Next.js 16 and Capacitor.
+- Developed an AI-driven PDF import pipeline specialized in bank statements, processing 30–50 pages in 10–15 seconds.
+- Integrated Groq and Gemini multimodal models for high-accuracy transaction extraction (92–95%).
+- Utilized Supabase with PostgreSQL RLS for secure, scalable data storage; supporting 100–500 beta users.
+- GitHub: github.com/Arsh-pixel-cmd/expense-tracker
+
+**Jyotix-Astro – AI Astrology Platform** | Deployed
+- Architected a serverless full-stack astrology platform using Next.js App Router and Firebase BaaS.
+- Implemented a conversational AI astrologer using Gemini via GenKit for personalized readings.
+- Integrated secure authentication, Razorpay for subscriptions, and multi-language support (English, Hindi, Urdu).
+- Live: jyotix-astro.vercel.app
+
+**DevLens Ultra – Browser Extension** | In Progress
+- Developing a Manifest V3 Chrome extension that reverse-engineers CSS rules into React + Tailwind code.
+- Optimized performance to maintain 60FPS using requestIdleCallback during complex DOM traversals.
+- Implemented logic to filter 300+ browser default styles, extracting only meaningful design tokens.
+- GitHub: github.com/Arsh-pixel-cmd/DevLens
+
+**SKILLS**
+- **Languages:** JavaScript, TypeScript, Python, Java, C++, C, C#
+- **Frameworks:** React, Next.js, Node.js, Express.js, Tailwind CSS
+- **Databases:** MongoDB, PostgreSQL, MySQL, Firebase Firestore
+- **Cloud/DevOps:** AWS, Vercel, Supabase, Render, Netlify, Docker, GitHub Actions
+- **CS Fundamentals:** Algorithms, OOP, DBMS, Computer Networks, Complexity Analysis
+
+**ACHIEVEMENTS**
+- Top 10/85 – Foodoscope (IIIT Delhi).
+- Top 40/70 – HackOClock 2.0 (IILM University).
+- Received Letter of Recommendation for technical excellence.
+
+**LEADERSHIP**
+**Lead Developer – NextGenX AI Club** | Oct 2025 – Present
+- Leading a team of 5 developers to build the club’s digital infrastructure, including the official website and a DSA training platform.
+- Enabled over 250+ members through technical mentorship and processed 500+ registrations for club events.
+- Streamlined event management, reducing manual effort by 60% and improving platform load times by 35%.
+
+**VOLUNTEERING**
+**Student Volunteer – Nexus of Nerds** | May 2025 – Nov 2025
+- Contributed to event planning, outreach, and community engagement for the tech society.
+- Supported technical sessions and workshops across a network of 50+ universities.`),
+                }
+              ]
             }
           ]
         }

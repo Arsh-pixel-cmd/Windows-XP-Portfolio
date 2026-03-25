@@ -18,6 +18,7 @@ const INITIAL_STATE_ICONS = [
   { id: 'notepad', label: 'Notepad.exe', appType: 'notepad', x: 110, y: 20 },
   { id: 'monitor', label: 'SysMon.exe', appType: 'monitor', x: 110, y: 110 },
   { id: 'logviewer', label: 'EventLog.exe', appType: 'logviewer', x: 110, y: 200 },
+  { id: 'resume', label: 'Resume.txt', appType: 'notepad', x: 200, y: 20 },
 ];
 
 const INITIAL_STATE: SystemState = {
