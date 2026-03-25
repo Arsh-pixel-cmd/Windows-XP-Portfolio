@@ -78,3 +78,7 @@ Access the simulator at `http://localhost:5173/`.
 <p align="center">
   <i>Engineered by Arsh Mishra // Systems Architect</i>
 </p>
+
+<p align="center">
+  <i>⭐️ The repo if you like </i>
+</p>
