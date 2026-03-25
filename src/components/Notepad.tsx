@@ -31,10 +31,6 @@ export const Notepad: React.FC<NotepadProps> = ({ process, systemState }) => {
       type: 'FS_WRITE',
       payload: { path: filePath, content }
     });
-    systemBus.emit({
-      type: 'SYS_LOG',
-      payload: { level: 'INFO', message: `Notepad saved to ${filePath}` }
-    });
   };
 
   const handleCopyAll = () => {

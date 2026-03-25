@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Process, SystemState } from '../core/types';
 import { systemBus } from '../core/eventBus';
-import { resolvePath, FileSystemError } from '../core/vfs';
+import { listDirectory, readContent } from '../core/vfs';
 
 interface TerminalProps {
   process: Process;
@@ -10,11 +10,12 @@ interface TerminalProps {
 
 export const Terminal: React.FC<TerminalProps> = ({ systemState }) => {
   const [history, setHistory] = useState<string[]>(['Microsoft Windows XP [Version 5.1.2600]', '(C) Copyright 1985-2001 Microsoft Corp.', '']);
-  const [currentDir, setCurrentDir] = useState('C:/Users/Arsh');
   const [input, setInput] = useState('');
   const [cmdHistory, setCmdHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const currentDir = systemState.currentPath;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'auto' });
@@ -36,7 +37,7 @@ export const Terminal: React.FC<TerminalProps> = ({ systemState }) => {
 
     switch (cmd) {
       case 'help':
-        setHistory(prev => [...prev, 'Available commands:', '  ls [path]      List files', '  cd <path>      Change directory', '  cat <file>     Read file content', '  ps             List running processes', '  kill <pid>     Terminate a process', '  clear          Clear screen', '  whoami         System identity']);
+        setHistory(prev => [...prev, 'Available commands:', '  ls [path]      List files', '  cd <path>      Change directory', '  cat <file>     Read file content', '  mkdir <name>   Create directory', '  touch <name>   Create file', '  rm <path>      Delete file/empty dir', '  ps             List processes', '  kill <pid>     Stop process', '  clear          Clear screen', '  whoami         Identity']);
         break;
       case 'clear':
         setHistory([]);
@@ -47,32 +48,16 @@ export const Terminal: React.FC<TerminalProps> = ({ systemState }) => {
       case 'ls': {
         try {
           const path = args[0] || '.';
-          const dir = resolvePath(systemState.fileSystem, path, currentDir);
-          if (dir.type !== 'directory') {
-            setHistory(prev => [...prev, `ls: ${path}: Not a directory`]);
-          } else {
-            const files = Object.keys(dir.children || {}).join('  ');
-            setHistory(prev => [...prev, files || '(empty directory)']);
-          }
+          const files = listDirectory(systemState.fileSystem, path === '.' ? currentDir : path);
+          setHistory(prev => [...prev, files.join('  ') || '(empty directory)']);
         } catch (err: any) {
           setHistory(prev => [...prev, `ls: ${err.message}`]);
         }
         break;
       }
       case 'cd': {
-        try {
-          const path = args[0] || 'C:/Users/Arsh';
-          const dir = resolvePath(systemState.fileSystem, path, currentDir);
-          if (dir.type !== 'directory') {
-            setHistory(prev => [...prev, `cd: ${path}: Not a directory`]);
-          } else {
-             // Basic path normalization for display
-             const newPath = path.startsWith('C:') ? path : `${currentDir}/${path}`.replace(/\/+/g, '/').replace(/\/$/, '');
-             setCurrentDir(newPath);
-          }
-        } catch (err: any) {
-          setHistory(prev => [...prev, `cd: ${err.message}`]);
-        }
+        const path = args[0] || 'C:/Users/Arsh';
+        systemBus.emit({ type: 'FS_CD', payload: { path } });
         break;
       }
       case 'cat': {
@@ -80,44 +65,45 @@ export const Terminal: React.FC<TerminalProps> = ({ systemState }) => {
           const path = args[0];
           if (!path) {
             setHistory(prev => [...prev, 'Usage: cat <filename>']);
-            break;
-          }
-          const file = resolvePath(systemState.fileSystem, path, currentDir);
-          if (file.type === 'directory') {
-            setHistory(prev => [...prev, `cat: ${path}: Is a directory`]);
           } else {
-            setHistory(prev => [...prev, file.content || '']);
+            const content = readContent(systemState.fileSystem, path);
+            setHistory(prev => [...prev, content]);
           }
         } catch (err: any) {
           setHistory(prev => [...prev, `cat: ${err.message}`]);
         }
         break;
       }
+      case 'mkdir': {
+        const path = args[0];
+        if (path) systemBus.emit({ type: 'FS_CREATE_DIR', payload: { path } });
+        else setHistory(prev => [...prev, 'Usage: mkdir <name>']);
+        break;
+      }
+      case 'touch': {
+        const path = args[0];
+        if (path) systemBus.emit({ type: 'FS_CREATE_FILE', payload: { path } });
+        else setHistory(prev => [...prev, 'Usage: touch <name>']);
+        break;
+      }
+      case 'rm': {
+        const path = args[0];
+        if (path) systemBus.emit({ type: 'FS_DELETE', payload: { path } });
+        else setHistory(prev => [...prev, 'Usage: rm <path>']);
+        break;
+      }
       case 'ps': {
-        const header = 'PID    NAME         STATUS      CPU    MEM';
+        const header = 'PID    NAME         CPU    MEM';
         const rows = systemState.processes.map(p => 
-          `${p.pid.toString().padEnd(6)} ${p.name.padEnd(12)} ${p.status.padEnd(10)} ${p.cpuUsage.toFixed(1)}%   ${p.memoryUsage.toFixed(1)}MB`
+          `${p.pid.toString().padEnd(6)} ${p.name.padEnd(12)} ${p.cpu.toFixed(1)}%   ${p.memory.toFixed(1)}MB`
         );
         setHistory(prev => [...prev, header, ...rows]);
         break;
       }
       case 'kill': {
         const pid = parseInt(args[0]);
-        if (isNaN(pid)) {
-          setHistory(prev => [...prev, 'Usage: kill <pid>']);
-        } else {
-          systemBus.emit({ type: 'PROC_KILL', payload: { pid } });
-          setHistory(prev => [...prev, `Sent SIGTERM to process ${pid}`]);
-        }
-        break;
-      }
-      case 'open': {
-        const app = args[0]?.replace('.exe', '');
-        if (app) {
-           systemBus.emit({ type: 'PROC_START', payload: { appType: app, title: `${app}.exe` } });
-        } else {
-          setHistory(prev => [...prev, 'Usage: open <app_name>']);
-        }
+        if (!isNaN(pid)) systemBus.emit({ type: 'PROC_KILL', payload: { pid } });
+        else setHistory(prev => [...prev, 'Usage: kill <pid>']);
         break;
       }
       default:
@@ -149,7 +135,7 @@ export const Terminal: React.FC<TerminalProps> = ({ systemState }) => {
 
   return (
     <div 
-      className="bg-black text-[#CCCCBB] font-mono p-2 h-full flex flex-col overflow-hidden text-sm selection:bg-white selection:text-black cursor-text"
+      className="bg-black text-[#CCCCBB] font-mono p-2 h-full flex flex-col overflow-hidden text-sm cursor-text"
       onClick={() => document.getElementById('term-input')?.focus()}
     >
       <div className="flex-1 overflow-auto custom-scrollbar">

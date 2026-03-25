@@ -1,17 +1,33 @@
 // src/core/types.ts
 
-export type ProcessStatus = 'starting' | 'running' | 'suspended' | 'terminated';
+export type LogLevel = 'INFO' | 'WARN' | 'ERROR';
+
+export type LogEntry = {
+  id: string; // eventId
+  timestamp: number;
+  level: LogLevel;
+  message: string;
+  meta?: {
+    eventType?: string;
+    path?: string;
+    pid?: number;
+    [key: string]: any;
+  };
+};
+
+export type ProcessStatus = 'running' | 'suspended' | 'terminated';
 
 export interface Process {
   pid: number;
   name: string;
   appType: string;
   status: ProcessStatus;
+  memory: number; // in MB
+  cpu: number;    // % usage
   createdAt: number;
-  cpuUsage: number;
-  memoryUsage: number;
-  params?: Record<string, any>;
+  cpuTime: number; 
   windowId: string;
+  params?: Record<string, any>;
 }
 
 export type FileNodeType = 'file' | 'directory';
@@ -20,20 +36,45 @@ export interface FileNode {
   name: string;
   type: FileNodeType;
   content?: string;
-  children?: Record<string, FileNode>;
-  parent?: string;
-  permissions: {
-    read: boolean;
-    write: boolean;
-    delete: boolean;
-  };
+  children?: FileNode[];
+  readonly?: boolean;
 }
 
 export interface SystemResources {
   cpuLoad: number;
-  memoryUsed: number;
-  totalMemory: number;
-  fps: number;
+  memoryUsage: number;
+}
+
+export type SystemEvent =
+  | { type: 'TICK'; payload?: undefined }
+  | { type: 'FS_CREATE_FILE'; payload: { path: string; content?: string } }
+  | { type: 'FS_CREATE_DIR'; payload: { path: string } }
+  | { type: 'FS_WRITE'; payload: { path: string; content: string } }
+  | { type: 'FS_DELETE'; payload: { path: string } }
+  | { type: 'FS_MOVE'; payload: { from: string; to: string } }
+  | { type: 'FS_RENAME'; payload: { path: string; newName: string } }
+  | { type: 'FS_CD'; payload: { path: string } }
+  | { type: 'FS_PWD'; payload?: undefined }
+  | { type: 'PROC_START'; payload: { appType: string; title: string; params?: any } }
+  | { type: 'PROC_KILL'; payload: { pid: number } }
+  | { type: 'WIN_FOCUS'; payload: { id: string } }
+  | { type: 'WIN_MINIMIZE'; payload: { id: string } }
+  | { type: 'WIN_MAXIMIZE'; payload: { id: string } }
+  | { type: 'WIN_MOVE'; payload: { id: string; x: number; y: number } }
+  | { type: 'WIN_RESIZE'; payload: { id: string; width: number; height: number } }
+  | { type: 'SYS_LOG'; payload: LogEntry }
+  | { type: 'SYS_REBOOT'; payload?: undefined };
+
+export interface SystemState {
+  tick: number;
+  processes: Process[];
+  windows: WindowInstance[];
+  fileSystem: FileNode;
+  logs: LogEntry[];
+  resources: SystemResources;
+  currentPath: string; // Normalized Absolute Path
+  activeWindowId: string | null;
+  bootStatus: 'booting' | 'loading' | 'ready';
 }
 
 export interface WindowInstance {
@@ -46,29 +87,4 @@ export interface WindowInstance {
   isMaximized: boolean;
   position: { x: number; y: number };
   size: { width: number; height: number };
-}
-
-export type SystemEvent =
-  | { type: 'PROC_START'; payload: { appType: string; title: string; params?: any } }
-  | { type: 'PROC_KILL'; payload: { pid: number } }
-  | { type: 'PROC_SUSPEND'; payload: { pid: number } }
-  | { type: 'PROC_RESUME'; payload: { pid: number } }
-  | { type: 'FS_CREATE'; payload: { path: string; type: FileNodeType; content?: string } }
-  | { type: 'FS_DELETE'; payload: { path: string } }
-  | { type: 'FS_WRITE'; payload: { path: string; content: string } }
-  | { type: 'WIN_FOCUS'; payload: { id: string } }
-  | { type: 'WIN_MINIMIZE'; payload: { id: string } }
-  | { type: 'WIN_MAXIMIZE'; payload: { id: string } }
-  | { type: 'WIN_MOVE'; payload: { id: string; x: number; y: number } }
-  | { type: 'WIN_RESIZE'; payload: { id: string; width: number; height: number } }
-  | { type: 'SYS_LOG'; payload: { level: 'INFO' | 'WARN' | 'ERROR'; message: string } }
-  | { type: 'SYS_REBOOT'; payload?: undefined };
-
-export interface SystemState {
-  processes: Process[];
-  windows: WindowInstance[];
-  fileSystem: FileNode;
-  resources: SystemResources;
-  activeWindowId: string | null;
-  bootStatus: 'booting' | 'loading' | 'ready';
 }

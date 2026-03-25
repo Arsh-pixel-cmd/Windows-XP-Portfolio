@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cpu, Activity, List, XCircle } from 'lucide-react';
+import { Cpu, List, XCircle } from 'lucide-react';
 import { Process, SystemState } from '../core/types';
 import { systemBus } from '../core/eventBus';
 
@@ -19,13 +19,8 @@ export const SystemMonitor: React.FC<SystemMonitorProps> = ({ systemState }) => 
     <div className="flex flex-col h-full bg-[#ECE9D8] p-2 gap-4 font-tahoma overflow-auto select-none">
       <div className="grid grid-cols-2 gap-2">
         <div className="bg-white border border-gray-400 p-2 shadow-inner flex flex-col items-center">
-          <Activity size={24} className="text-green-600 mb-1" />
-          <div className="text-xl font-bold">{resources.fps}</div>
-          <div className="text-[10px] uppercase text-gray-500">System FPS</div>
-        </div>
-        <div className="bg-white border border-gray-400 p-2 shadow-inner flex flex-col items-center">
           <Cpu size={24} className="text-blue-600 mb-1" />
-          <div className="text-xl font-bold">{Math.round(resources.memoryUsed)}MB</div>
+          <div className="text-xl font-bold">{Math.round(resources.memoryUsage)}MB</div>
           <div className="text-[10px] uppercase text-gray-500">Kernel Heap</div>
         </div>
       </div>
@@ -50,8 +45,8 @@ export const SystemMonitor: React.FC<SystemMonitorProps> = ({ systemState }) => 
                 <tr key={p.pid} className="border-b border-gray-100 hover:bg-blue-50 group">
                   <td className="px-2 py-1 border-r border-gray-200 font-mono text-gray-500">{p.pid}</td>
                   <td className="px-2 py-1 border-r border-gray-200 font-bold">{p.name}</td>
-                  <td className="px-2 py-1 border-r border-gray-200">{p.cpuUsage.toFixed(1)}%</td>
-                  <td className="px-2 py-1 border-r border-gray-200">{p.memoryUsage.toFixed(1)}MB</td>
+                  <td className="px-2 py-1 border-r border-gray-200">{p.cpu.toFixed(1)}%</td>
+                  <td className="px-2 py-1 border-r border-gray-200">{p.memory.toFixed(1)}MB</td>
                   <td className="px-2 py-1 text-center">
                     <button 
                       onClick={() => handleKill(p.pid)}
