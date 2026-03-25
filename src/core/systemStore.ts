@@ -1,5 +1,5 @@
 // src/core/systemStore.ts
-import { SystemState, SystemEvent, Process, WindowInstance, FileNode } from './types';
+import { SystemState, SystemEvent, Process, WindowInstance } from './types';
 import { systemBus } from './eventBus';
 import { INITIAL_FS, updateFS } from './vfs';
 
