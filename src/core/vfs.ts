@@ -47,7 +47,7 @@ export class FileLockedError extends VfsError {
 const NOW = Date.now();
 
 export function normalizePath(path: string): string {
-  let p = path.replace(/\\/g, '/');
+  const p = path.replace(/\\/g, '/');
   const parts = p.split('/').filter(Boolean);
   const stack: string[] = [];
   

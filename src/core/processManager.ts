@@ -67,7 +67,7 @@ export function createProcessInstance(
   name: string, 
   appType: string, 
   windowId: string, 
-  params?: any
+  params?: Record<string, unknown>
 ): Process {
   return {
     pid,
@@ -77,7 +77,7 @@ export function createProcessInstance(
     createdAt: Date.now(),
     cpu: 2, 
     memory: 40 + Math.random() * 60,
-    priority: params?.priority || 'NORMAL',
+    priority: (params?.priority as 'LOW' | 'NORMAL' | 'HIGH') || 'NORMAL',
     cpuTime: 0,
     windowId,
     params

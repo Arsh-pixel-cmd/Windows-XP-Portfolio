@@ -64,8 +64,9 @@ export const Terminal: React.FC<TerminalProps> = ({ systemState }) => {
           const path = args[0] || '.';
           const files = listDirectory(systemState.fileSystem, path === '.' ? currentDir : path);
           setHistory(prev => [...prev, files.join('  ') || '(empty directory)']);
-        } catch (err: any) {
-          setHistory(prev => [...prev, `ls: ${err.message}`]);
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : String(err);
+          setHistory(prev => [...prev, `ls: ${message}`]);
         }
         break;
       }
@@ -83,8 +84,9 @@ export const Terminal: React.FC<TerminalProps> = ({ systemState }) => {
             const content = readContent(systemState.fileSystem, path);
             setHistory(prev => [...prev, content]);
           }
-        } catch (err: any) {
-          setHistory(prev => [...prev, `cat: ${err.message}`]);
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : String(err);
+          setHistory(prev => [...prev, `cat: ${message}`]);
         }
         break;
       }

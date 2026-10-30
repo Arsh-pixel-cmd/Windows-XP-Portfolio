@@ -50,8 +50,109 @@ interface DesktopIconDefinition {
   icon: React.ReactElement;
   appType: string;
   size: { width: number; height: number };
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
 }
+
+interface LogIconProps {
+  size: number;
+  className?: string;
+  fill?: string;
+}
+
+const LogIcon: React.FC<LogIconProps> = ({ size, className }) => (
+  <div className={`p-1 bg-white border border-gray-400 rounded-sm ${className || ''}`}>
+    <div className="w-full h-full bg-blue-100 flex items-center justify-center">
+      <Monitor size={size - 8} />
+    </div>
+  </div>
+);
+
+const DESKTOP_ICONS: DesktopIconDefinition[] = [
+  {
+    id: 'about',
+    label: 'About.exe',
+    icon: <Monitor size={32} fill="#4176CF" className="text-blue-200 drop-shadow-md" />,
+    appType: 'about',
+    size: { width: 550, height: 450 }
+  },
+  {
+    id: 'projects',
+    label: 'Projects.exe',
+    icon: <Folder size={32} fill="currentColor" className="text-yellow-400 drop-shadow-md" />,
+    appType: 'projects',
+    size: { width: 600, height: 500 }
+  },
+  {
+    id: 'systems',
+    label: 'Systems.exe',
+    icon: <Globe size={32} fill="#3B82F6" className="text-white drop-shadow-md" />,
+    appType: 'systems',
+    size: { width: 500, height: 450 }
+  },
+  {
+    id: 'experiments',
+    label: 'Experiments.exe',
+    icon: <FlaskConical size={32} fill="#A855F7" className="text-white drop-shadow-md" />,
+    appType: 'experiments',
+    size: { width: 450, height: 400 }
+  },
+  {
+    id: 'terminal',
+    label: 'cmd.exe',
+    icon: <Layout size={32} className="text-black drop-shadow-md" fill="#333" />,
+    appType: 'terminal',
+    size: { width: 600, height: 400 }
+  },
+  {
+    id: 'contact',
+    label: 'Contact.exe',
+    icon: <Mail size={32} className="text-blue-100 drop-shadow-md" fill="#3B82F6" />,
+    appType: 'contact',
+    size: { width: 450, height: 420 }
+  },
+  {
+    id: 'notepad',
+    label: 'Notepad.exe',
+    icon: <FileText size={32} className="text-gray-600 drop-shadow-md" fill="#fff" />,
+    appType: 'notepad',
+    size: { width: 500, height: 400 }
+  },
+  {
+    id: 'monitor',
+    label: 'SysMon.exe',
+    icon: <Cpu size={32} className="text-green-600 drop-shadow-md" fill="#333" />,
+    appType: 'monitor',
+    size: { width: 400, height: 500 }
+  },
+  {
+    id: 'logviewer',
+    label: 'EventLog.exe',
+    icon: <LogIcon size={32} className="text-blue-600 drop-shadow-md" fill="#fff" />,
+    appType: 'logviewer',
+    size: { width: 600, height: 400 }
+  },
+  {
+    id: 'resume',
+    label: 'Resume.txt',
+    icon: <FileText size={32} className="text-gray-600 drop-shadow-md" fill="#fff" />,
+    appType: 'resume',
+    size: { width: 500, height: 400 }
+  },
+  {
+    id: 'identity',
+    label: 'Identity.exe',
+    icon: <User size={32} className="text-orange-500 drop-shadow-md" fill="#fff" />,
+    appType: 'identity',
+    size: { width: 600, height: 450 }
+  },
+  {
+    id: 'tips',
+    label: 'Hints.exe',
+    icon: <HelpCircle size={32} className="text-blue-500 drop-shadow-md" fill="#fff" />,
+    appType: 'tips',
+    size: { width: 380, height: 480 }
+  },
+];
 
 export default function App() {
   const [state, setState] = useState<SystemState>(systemStore.getState());
@@ -62,101 +163,6 @@ export default function App() {
     const unsub = systemStore.subscribe(setState);
     return () => { unsub(); };
   }, []);
-
-  const LogIcon = ({ size, className }: any) => (
-    <div className={`p-1 bg-white border border-gray-400 rounded-sm ${className}`}>
-      <div className="w-full h-full bg-blue-100 flex items-center justify-center">
-        <Monitor size={size - 8} />
-      </div>
-    </div>
-  );
-
-  const DESKTOP_ICONS: DesktopIconDefinition[] = [
-    {
-      id: 'about',
-      label: 'About.exe',
-      icon: <Monitor size={32} fill="#4176CF" className="text-blue-200 drop-shadow-md" />,
-      appType: 'about',
-      size: { width: 550, height: 450 }
-    },
-    {
-      id: 'projects',
-      label: 'Projects.exe',
-      icon: <Folder size={32} fill="currentColor" className="text-yellow-400 drop-shadow-md" />,
-      appType: 'projects',
-      size: { width: 600, height: 500 }
-    },
-    {
-      id: 'systems',
-      label: 'Systems.exe',
-      icon: <Globe size={32} fill="#3B82F6" className="text-white drop-shadow-md" />,
-      appType: 'systems',
-      size: { width: 500, height: 450 }
-    },
-    {
-      id: 'experiments',
-      label: 'Experiments.exe',
-      icon: <FlaskConical size={32} fill="#A855F7" className="text-white drop-shadow-md" />,
-      appType: 'experiments',
-      size: { width: 450, height: 400 }
-    },
-    {
-      id: 'terminal',
-      label: 'cmd.exe',
-      icon: <Layout size={32} className="text-black drop-shadow-md" fill="#333" />,
-      appType: 'terminal',
-      size: { width: 600, height: 400 }
-    },
-    {
-      id: 'contact',
-      label: 'Contact.exe',
-      icon: <Mail size={32} className="text-blue-100 drop-shadow-md" fill="#3B82F6" />,
-      appType: 'contact',
-      size: { width: 450, height: 420 }
-    },
-    {
-      id: 'notepad',
-      label: 'Notepad.exe',
-      icon: <FileText size={32} className="text-gray-600 drop-shadow-md" fill="#fff" />,
-      appType: 'notepad',
-      size: { width: 500, height: 400 }
-    },
-    {
-      id: 'monitor',
-      label: 'SysMon.exe',
-      icon: <Cpu size={32} className="text-green-600 drop-shadow-md" fill="#333" />,
-      appType: 'monitor',
-      size: { width: 400, height: 500 }
-    },
-    {
-      id: 'logviewer',
-      label: 'EventLog.exe',
-      icon: <LogIcon size={32} className="text-blue-600 drop-shadow-md" fill="#fff" />,
-      appType: 'logviewer',
-      size: { width: 600, height: 400 }
-    },
-    {
-      id: 'resume',
-      label: 'Resume.txt',
-      icon: <FileText size={32} className="text-gray-600 drop-shadow-md" fill="#fff" />,
-      appType: 'resume',
-      size: { width: 500, height: 400 }
-    },
-    {
-      id: 'identity',
-      label: 'Identity.exe',
-      icon: <User size={32} className="text-orange-500 drop-shadow-md" fill="#fff" />,
-      appType: 'identity',
-      size: { width: 600, height: 450 }
-    },
-    {
-      id: 'tips',
-      label: 'Hints.exe',
-      icon: <HelpCircle size={32} className="text-blue-500 drop-shadow-md" fill="#fff" />,
-      appType: 'tips',
-      size: { width: 380, height: 480 }
-    },
-  ];
 
   const getComponentForApp = (appType: string) => {
     switch (appType) {
@@ -176,7 +182,7 @@ export default function App() {
     }
   };
 
-  const openApp = useCallback((appType: string, params?: Record<string, any>) => {
+  const openApp = useCallback((appType: string, params?: Record<string, unknown>) => {
     const iconDef = DESKTOP_ICONS.find(i => i.appType === appType);
     if (iconDef) {
        systemBus.emit({
@@ -188,7 +194,7 @@ export default function App() {
          }
        });
     }
-  }, [DESKTOP_ICONS]);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -202,7 +208,7 @@ export default function App() {
       setTimeout(() => openApp('tips'), 300);
     }, 2000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [openApp]);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();

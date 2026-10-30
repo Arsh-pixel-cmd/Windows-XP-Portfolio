@@ -110,23 +110,23 @@ export const systemStore = {
           });
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (event.type !== 'TICK') {
-        log('ERROR', error.message || 'Execution failed', { eventType: event.type, eventId, parentEventId });
+        const message = error instanceof Error ? error.message : 'Execution failed';
+        log('ERROR', message, { eventType: event.type, eventId, parentEventId });
       }
     }
   }
 };
 
 function validateEvent(event: SystemEvent, state: SystemState) {
-  const e = event as any;
   switch (event.type) {
     case 'PROC_START':
       validateSystemLimits(state);
       break;
     case 'SYS_IMPORT_STATE':
-      if (e.payload.version !== SYSTEM_VERSION) {
-        throw new Error(`Incompatible system version: ${e.payload.version}`);
+      if (event.payload.version !== SYSTEM_VERSION) {
+        throw new Error(`Incompatible system version: ${event.payload.version}`);
       }
       break;
   }
@@ -135,7 +135,7 @@ function validateEvent(event: SystemEvent, state: SystemState) {
 function kernelReducer(state: SystemState, event: SystemEvent): SystemState {
   switch (event.type) {
     case 'TICK': {
-      let nextState = { ...state, tick: event.payload.tick };
+      const nextState = { ...state, tick: event.payload.tick };
       
       // 1. Compute resources (with hysteresis)
       nextState.resources = computeResources(nextState.processes, nextState.tick, state);

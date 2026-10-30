@@ -13,7 +13,7 @@ export type LogEntry = {
     pid?: number;
     eventId?: string;
     parentEventId?: string; // For correlation
-    [key: string]: any;
+    [key: string]: unknown;
   };
 };
 
@@ -30,7 +30,7 @@ export interface Process {
   createdAt: number;
   cpuTime: number; 
   windowId: string;
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
 }
 
 export type FileNodeType = 'file' | 'directory';
@@ -71,7 +71,7 @@ export interface DesktopIconData {
   appType: string;
   x: number;
   y: number;
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
 }
 
 export interface SystemState {
@@ -102,7 +102,7 @@ export type SystemEvent =
   | { type: 'FS_CD'; payload: { path: string } }
   | { type: 'FS_LOCK'; payload: { path: string; pid: number } }
   | { type: 'FS_UNLOCK'; payload: { path: string; pid: number } }
-  | { type: 'PROC_START'; payload: { appType: string; title: string; priority?: 'LOW' | 'NORMAL' | 'HIGH'; params?: any } }
+  | { type: 'PROC_START'; payload: { appType: string; title: string; priority?: 'LOW' | 'NORMAL' | 'HIGH'; params?: Record<string, unknown> } }
   | { type: 'PROC_KILL'; payload: { pid: number } }
   | { type: 'PROC_PRIORITY'; payload: { pid: number; priority: 'LOW' | 'NORMAL' | 'HIGH' } }
   | { type: 'PROC_CRASH'; payload: { pid: number; reason: string } }

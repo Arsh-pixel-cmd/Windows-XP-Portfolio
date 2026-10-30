@@ -12,7 +12,7 @@ let logCounter = 0;
 export const log = (
   level: LogLevel, 
   message: string, 
-  meta?: { eventType?: string; path?: string; pid?: number; [key: string]: any }
+  meta?: LogEntry['meta']
 ) => {
   const entry: LogEntry = {
     id: `evt-${Date.now()}-${logCounter++}`,

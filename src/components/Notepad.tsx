@@ -9,9 +9,28 @@ interface NotepadProps {
 }
 
 export const Notepad: React.FC<NotepadProps> = ({ process, systemState }) => {
-  const [content, setContent] = useState('');
-  const [filePath] = useState(process.params?.filePath || 'C:/Users/Arsh/Documents/note.txt');
-  const [isReadOnly, setIsReadOnly] = useState(false);
+  const filePath = (typeof process.params?.filePath === 'string' && process.params.filePath)
+    ? process.params.filePath
+    : 'C:/Users/Arsh/Documents/note.txt';
+
+  const [content, setContent] = useState<string>(() => {
+    try {
+      const file = resolvePath(systemState.fileSystem, filePath);
+      return file.type === 'file' ? (file.content || '') : '';
+    } catch {
+      return '';
+    }
+  });
+
+  const [isReadOnly] = useState<boolean>(() => {
+    try {
+      const file = resolvePath(systemState.fileSystem, filePath);
+      return file.type === 'file' && Boolean(file.lockedBy && file.lockedBy !== process.pid);
+    } catch {
+      return false;
+    }
+  });
+
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -19,11 +38,8 @@ export const Notepad: React.FC<NotepadProps> = ({ process, systemState }) => {
       try {
         const file = resolvePath(systemState.fileSystem, filePath);
         if (file.type === 'file') {
-          setContent(file.content || '');
-          
           // Try to lock the file
           if (file.lockedBy && file.lockedBy !== process.pid) {
-            setIsReadOnly(true);
             systemBus.emit({
               type: 'SYS_LOG',
               payload: { 

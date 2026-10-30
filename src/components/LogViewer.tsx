@@ -39,7 +39,7 @@ export const LogViewer: React.FC<LogViewerProps> = ({ systemState }) => {
           <select 
             className="bg-white border border-gray-400 px-1 py-0.5 outline-none text-xs font-tahoma shadow-sm focus:border-blue-500"
             value={filter}
-            onChange={(e) => setFilter(e.target.value as any)}
+            onChange={(e) => setFilter(e.target.value as 'ALL' | 'INFO' | 'WARN' | 'ERROR')}
           >
             <option value="ALL">All Levels</option>
             <option value="INFO">Info</option>

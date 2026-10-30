@@ -77,7 +77,7 @@ export const SystemMonitor: React.FC<SystemMonitorProps> = ({ systemState }) => 
 
       <div className="text-[10px] text-gray-500 flex justify-between italic">
         <span>Arsh Kernel v4.0.0-lts</span>
-        <span>Uptime: {Math.floor(performance.now() / 1000)}s</span>
+        <span>Uptime: {systemState.tick}s</span>
       </div>
     </div>
   );
