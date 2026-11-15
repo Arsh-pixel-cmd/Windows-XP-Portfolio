@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { format } from 'date-fns';
+import React from 'react';
+import { SystemTray } from './SystemTray';
 
 interface TaskbarProps {
   openWindows: { id: string; title: string; icon: React.ReactNode; active: boolean }[];
   onTaskClick: (id: string) => void;
   onStartClick: () => void;
   isStartMenuOpen: boolean;
+  onOpenApp?: (appType: string) => void;
 }
 
-export const Taskbar: React.FC<TaskbarProps> = ({ openWindows, onTaskClick, onStartClick, isStartMenuOpen }) => {
-  const [time, setTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
+export const Taskbar: React.FC<TaskbarProps> = ({ 
+  openWindows, 
+  onTaskClick, 
+  onStartClick, 
+  isStartMenuOpen,
+  onOpenApp 
+}) => {
   return (
     <div className="w-full h-[30px] bg-gradient-to-b from-[#245EDB] via-[#1447A8] to-[#1447A8] flex items-center select-none shadow-[0_-1px_2px_rgba(0,0,0,0.3)]">
       <button 
@@ -46,10 +46,10 @@ export const Taskbar: React.FC<TaskbarProps> = ({ openWindows, onTaskClick, onSt
             key={w.id}
             onClick={() => onTaskClick(w.id)}
             className={`flex items-center gap-1.5 px-2 max-w-[150px] min-w-[80px] rounded-[3px] truncate text-xs text-white font-medium shadow-sm transition-all font-tahoma active:translate-y-[1px] ${
-          w.active
-            ? 'bg-[#124296] border border-[#0F367A] shadow-[inset_1px_1px_3px_rgba(0,0,0,0.5)]'
-            : 'bg-[#3A76DF] hover:bg-[#4882E4] border border-[#528CEF] shadow-[inset_1px_1px_1px_rgba(255,255,255,0.2)]'
-        }`}
+              w.active
+                ? 'bg-[#124296] border border-[#0F367A] shadow-[inset_1px_1px_3px_rgba(0,0,0,0.5)]'
+                : 'bg-[#3A76DF] hover:bg-[#4882E4] border border-[#528CEF] shadow-[inset_1px_1px_1px_rgba(255,255,255,0.2)]'
+            }`}
           >
             <span className="w-4 h-4 shrink-0 [&>svg]:w-full [&>svg]:h-full">{w.icon}</span>
             <span className="truncate">{w.title}</span>
@@ -58,16 +58,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({ openWindows, onTaskClick, onSt
       </div>
 
       {/* System Tray */}
-      <div className="h-full bg-gradient-to-b from-[#0F8CEB] to-[#0A62A6] px-3 flex items-center border-l border-[#0B5C9E] shadow-[inset_1px_1px_2px_rgba(255,255,255,0.2),-1px_0_2px_rgba(0,0,0,0.2)_inset] text-white text-xs gap-3">
-        {/* Notification Icons */}
-        <div className="flex gap-1.5 items-center">
-          <div className="w-3 h-3 bg-blue-200 rounded-full opacity-80 border border-blue-900 shadow-sm"></div>
-          <div className="w-3 h-3 bg-yellow-400 rounded-full opacity-80 border border-yellow-700 shadow-sm"></div>
-        </div>
-        <span className="drop-shadow-sm font-tahoma">
-          {format(time, 'h:mm a')}
-        </span>
-      </div>
+      <SystemTray onOpenApp={onOpenApp} />
     </div>
   );
 };

@@ -14,6 +14,7 @@ interface StartMenuProps {
   onClose: () => void;
   onLogOffClick: () => void;
   onTurnOffClick: () => void;
+  onRunClick?: () => void;
 }
 
 export const StartMenu: React.FC<StartMenuProps> = ({ 
@@ -21,7 +22,8 @@ export const StartMenu: React.FC<StartMenuProps> = ({
   onOpenApp, 
   onRefreshDesktop, 
   onLogOffClick, 
-  onTurnOffClick 
+  onTurnOffClick,
+  onRunClick
 }) => {
   const [session, setSession] = useState<UserSession | null>(authStore.getState().session);
 
@@ -198,22 +200,22 @@ export const StartMenu: React.FC<StartMenuProps> = ({
 
           <div className="h-[1px] bg-[#91B2E6]/50 my-1 mx-2 shadow-[0_1px_0_rgba(255,255,255,0.5)]" />
 
-          {/* Control Panel / Admin Panel */}
+          {/* My Computer */}
           <div 
-            onClick={() => {
-              if (isAdmin) {
-                onOpenApp('admin');
-              } else {
-                onLogOffClick();
-              }
-              onClose();
-            }}
+            onClick={() => { onOpenApp('explorer'); onClose(); }}
+            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
+          >
+            <Computer className="text-[#4176CF] group-hover:text-white w-6 h-6" />
+            <span className="text-[12px] font-bold">My Computer</span>
+          </div>
+
+          {/* Control Panel */}
+          <div 
+            onClick={() => { onOpenApp('control'); onClose(); }}
             className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
           >
             <Settings className="text-[#4176CF] group-hover:text-white w-6 h-6" />
-            <span className="text-[12px] font-bold">
-              {isAdmin ? 'Control Panel (Admin)' : 'Admin Login'}
-            </span>
+            <span className="text-[12px] font-bold">Control Panel</span>
           </div>
 
           <div 
@@ -251,7 +253,14 @@ export const StartMenu: React.FC<StartMenuProps> = ({
             <span className="text-[12px]">Search</span>
           </div>
           <div 
-            onClick={() => { onOpenApp('terminal'); onClose(); }}
+            onClick={() => { 
+              if (onRunClick) {
+                onRunClick();
+              } else {
+                onOpenApp('terminal');
+              }
+              onClose(); 
+            }}
             className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
           >
             <HardDrive className="text-[#4176CF] group-hover:text-white w-6 h-6" />

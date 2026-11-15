@@ -48,6 +48,7 @@ export const Terminal: React.FC<TerminalProps> = ({ systemState }) => {
           '  kill <pid>     Stop process', 
           '  priority <pid> <L|N|H>  Set process priority',
           '  crash <pid>    Force deterministic crash',
+          '  bsod           Kernel Blue Screen of Death',
           '  export         Export system state snapshot',
           '  clear          Clear screen', 
           '  whoami         Identity'
@@ -140,6 +141,10 @@ export const Terminal: React.FC<TerminalProps> = ({ systemState }) => {
         } else {
           setHistory(prev => [...prev, 'Usage: crash <pid>']);
         }
+        break;
+      }
+      case 'bsod': {
+        window.dispatchEvent(new CustomEvent('xp_trigger_bsod'));
         break;
       }
       case 'export': {

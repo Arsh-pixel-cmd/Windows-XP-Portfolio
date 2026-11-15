@@ -59,7 +59,30 @@ export const Window: React.FC<WindowProps> = React.memo(({
       dragMomentum={false}
       dragConstraints={{ left: 0, top: 0, right: window.innerWidth - 100, bottom: window.innerHeight - 100 }}
       onDragEnd={(_, info) => {
-        onMove(position.x + info.offset.x, position.y + info.offset.y);
+        const newX = position.x + info.offset.x;
+        const newY = position.y + info.offset.y;
+
+        // Window edge snapping
+        // 1. Top edge snap -> Maximize
+        if (newY <= 8) {
+          if (!isMaximized) onMaximize();
+          return;
+        }
+        // 2. Left edge snap -> Half screen left
+        if (newX <= 12) {
+          onMove(0, 0);
+          onResize(Math.floor(window.innerWidth / 2), window.innerHeight - 30);
+          return;
+        }
+        // 3. Right edge snap -> Half screen right
+        if (newX + size.width >= window.innerWidth - 12) {
+          const halfWidth = Math.floor(window.innerWidth / 2);
+          onMove(halfWidth, 0);
+          onResize(halfWidth, window.innerHeight - 30);
+          return;
+        }
+
+        onMove(Math.max(0, newX), Math.max(0, newY));
       }}
       onMouseDown={onFocus}
       initial={position}

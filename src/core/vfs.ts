@@ -82,6 +82,14 @@ export const INITIAL_FS: FileNode = {
   ...createNode('C:', 'directory', undefined, true),
   children: [
     {
+      ...createNode('RecycleBin', 'directory'),
+      children: [
+        {
+          ...createNode('old_shortcut.txt', 'file', 'Legacy Windows XP System Shortcut (Can be restored or purged).'),
+        }
+      ]
+    },
+    {
       ...createNode('Users', 'directory'),
       children: [
         {

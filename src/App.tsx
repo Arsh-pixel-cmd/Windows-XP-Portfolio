@@ -1,5 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Folder, FileText, Mail, Monitor, Globe, FlaskConical, Layout, Cpu, Settings, AlertTriangle, User, HelpCircle } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { 
+  Folder, FileText, Mail, Monitor, Globe, FlaskConical, 
+  Layout, Cpu, Settings, AlertTriangle, User, HelpCircle,
+  Computer, Trash2
+} from 'lucide-react';
 import { DesktopIcon } from './components/DesktopIcon';
 import { Taskbar } from './components/Taskbar';
 import { Window } from './components/Window';
@@ -20,12 +24,17 @@ import { AdminPanel } from './components/AdminPanel';
 import { LoginScreen } from './components/LoginScreen';
 import { LogOffDialog } from './components/LogOffDialog';
 import { TurnOffDialog } from './components/TurnOffDialog';
+import { FileExplorer } from './components/FileExplorer';
+import { ControlPanel } from './components/ControlPanel';
+import { RunDialog } from './components/RunDialog';
+import { BsodScreen } from './components/BsodScreen';
 
 // Core
 import { systemStore } from './core/systemStore';
 import { systemBus } from './core/eventBus';
 import { authStore, AuthState } from './core/authStore';
 import { portfolioStore } from './core/portfolioStore';
+import { soundEffects } from './core/soundEffects';
 import { SystemState, Process } from './core/types';
 
 // XP Boot Screen Component
@@ -166,6 +175,28 @@ const DESKTOP_ICONS: DesktopIconDefinition[] = [
     size: { width: 750, height: 550 },
     adminOnly: false,
   },
+  {
+    id: 'explorer',
+    label: 'My Computer',
+    icon: <Computer size={32} className="text-blue-500 drop-shadow-md" fill="#2563EB" />,
+    appType: 'explorer',
+    size: { width: 680, height: 460 },
+  },
+  {
+    id: 'recycle',
+    label: 'Recycle Bin',
+    icon: <Trash2 size={32} className="text-green-500 drop-shadow-md" fill="#16A34A" />,
+    appType: 'recycle',
+    size: { width: 560, height: 420 },
+    params: { initialPath: 'C:/RecycleBin' },
+  },
+  {
+    id: 'control',
+    label: 'Control Panel',
+    icon: <Settings size={32} className="text-blue-600 drop-shadow-md" fill="#2563EB" />,
+    appType: 'control',
+    size: { width: 620, height: 480 },
+  },
 ];
 
 export default function App() {
@@ -173,6 +204,14 @@ export default function App() {
   const [authState, setAuthState] = useState<AuthState>(authStore.getState());
   const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+
+  // Track A OS Features State
+  const [isRunDialogOpen, setIsRunDialogOpen] = useState(false);
+  const [isBsodOpen, setIsBsodOpen] = useState(false);
+  const [bsodCode, setBsodCode] = useState('0x000000D1');
+  const [wallpaper, setWallpaper] = useState<string>(() => localStorage.getItem('xp_wallpaper') || 'default');
+  const [selectedIconIds, setSelectedIconIds] = useState<string[]>([]);
+  const [selectionBox, setSelectionBox] = useState<{ startX: number; startY: number; currentX: number; currentY: number } | null>(null);
 
   // Dialogs
   const [isLogOffOpen, setIsLogOffOpen] = useState(false);
@@ -186,6 +225,40 @@ export default function App() {
     return () => { 
       unsubSystem(); 
       unsubAuth();
+    };
+  }, []);
+
+  // Track A Event Listeners: BSOD, Wallpaper, Shortcuts
+  useEffect(() => {
+    const handleBsod = (e: Event) => {
+      const detail = (e as CustomEvent<{ code?: string }>).detail;
+      setBsodCode(detail?.code || '0x000000D1');
+      setIsBsodOpen(true);
+    };
+
+    const handleWallpaper = (e: Event) => {
+      const detail = (e as CustomEvent<{ url: string }>).detail;
+      if (detail?.url) {
+        setWallpaper(detail.url);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Win+R or Alt+R opens Run dialog
+      if ((e.altKey && (e.key === 'r' || e.key === 'R')) || (e.metaKey && (e.key === 'r' || e.key === 'R'))) {
+        e.preventDefault();
+        setIsRunDialogOpen(true);
+      }
+    };
+
+    window.addEventListener('xp_trigger_bsod', handleBsod);
+    window.addEventListener('xp_wallpaper_update', handleWallpaper);
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('xp_trigger_bsod', handleBsod);
+      window.removeEventListener('xp_wallpaper_update', handleWallpaper);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
@@ -204,6 +277,9 @@ export default function App() {
       case 'monitor': return SystemMonitor;
       case 'logviewer': return LogViewer;
       case 'admin': return AdminPanel;
+      case 'explorer': return FileExplorer;
+      case 'recycle': return FileExplorer;
+      case 'control': return ControlPanel;
       default: return AboutMe;
     }
   };
@@ -247,12 +323,61 @@ export default function App() {
   }, [openApp]);
 
   const handleLoginComplete = () => {
+    soundEffects.playStartup();
     // Open default introductory windows after logging in
     if (state.windows.length === 0) {
       openApp('identity');
       setTimeout(() => openApp('tips'), 150);
     }
   };
+
+  const handleRunCommand = useCallback((cmd: string): boolean => {
+    const trimmed = cmd.trim().toLowerCase();
+    if (trimmed === 'bsod') {
+      setIsBsodOpen(true);
+      return true;
+    }
+
+    const appMap: Record<string, string> = {
+      'cmd': 'terminal',
+      'cmd.exe': 'terminal',
+      'terminal': 'terminal',
+      'explorer': 'explorer',
+      'explorer.exe': 'explorer',
+      'my computer': 'explorer',
+      'recycle': 'recycle',
+      'recycle bin': 'recycle',
+      'control': 'control',
+      'control panel': 'control',
+      'admin': 'admin',
+      'admin.exe': 'admin',
+      'notepad': 'notepad',
+      'notepad.exe': 'notepad',
+      'about': 'about',
+      'projects': 'projects',
+      'systems': 'systems',
+      'experiments': 'experiments',
+      'contact': 'contact',
+      'sysmon': 'monitor',
+      'sysmon.exe': 'monitor',
+      'monitor': 'monitor',
+      'eventlog': 'logviewer',
+      'eventlog.exe': 'logviewer',
+      'logviewer': 'logviewer',
+      'logs': 'logviewer',
+      'resume': 'resume',
+      'identity': 'identity',
+      'tips': 'tips',
+      'hints': 'tips',
+    };
+
+    const appType = appMap[trimmed];
+    if (appType) {
+      openApp(appType);
+      return true;
+    }
+    return false;
+  }, [openApp]);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -265,6 +390,66 @@ export default function App() {
     icon: DESKTOP_ICONS.find(i => i.appType === (state.processes.find(p => p.pid === w.pid) as Process)?.appType)?.icon || <FileText />,
     active: state.activeWindowId === w.id
   }));
+
+  // Desktop wallpaper style
+  const wallpaperStyle = useMemo((): React.CSSProperties => {
+    if (!wallpaper || wallpaper === 'default' || wallpaper === 'bliss') {
+      return { backgroundImage: `url(${blissImage})`, backgroundSize: 'cover', backgroundPosition: 'center' };
+    }
+    if (wallpaper === 'matrix') {
+      return { backgroundColor: '#020b02', backgroundImage: 'radial-gradient(#00FF41 12%, transparent 13%)', backgroundSize: '20px 20px' };
+    }
+    return { backgroundImage: `url(${wallpaper})`, backgroundSize: 'cover', backgroundPosition: 'center' };
+  }, [wallpaper]);
+
+  // Rubber-band marquee selection handlers
+  const handleDesktopMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    if (!e.shiftKey && !e.ctrlKey) {
+      setSelectedIconIds([]);
+    }
+    setSelectionBox({
+      startX: e.clientX,
+      startY: e.clientY,
+      currentX: e.clientX,
+      currentY: e.clientY,
+    });
+    setIsStartMenuOpen(false);
+    setContextMenu(null);
+  };
+
+  const handleDesktopMouseMove = (e: React.MouseEvent) => {
+    if (selectionBox) {
+      const currentX = e.clientX;
+      const currentY = e.clientY;
+      setSelectionBox(prev => prev ? { ...prev, currentX, currentY } : null);
+
+      const boxLeft = Math.min(selectionBox.startX, currentX);
+      const boxTop = Math.min(selectionBox.startY, currentY);
+      const boxRight = Math.max(selectionBox.startX, currentX);
+      const boxBottom = Math.max(selectionBox.startY, currentY);
+
+      const hitIds: string[] = [];
+      state.desktopIcons.forEach(icon => {
+        const iconLeft = icon.x;
+        const iconTop = icon.y;
+        const iconRight = icon.x + 72;
+        const iconBottom = icon.y + 80;
+
+        const overlaps = !(boxRight < iconLeft || boxLeft > iconRight || boxBottom < iconTop || boxTop > iconBottom);
+        if (overlaps) {
+          hitIds.push(icon.id);
+        }
+      });
+      setSelectedIconIds(hitIds);
+    }
+  };
+
+  const handleDesktopMouseUp = () => {
+    if (selectionBox) {
+      setSelectionBox(null);
+    }
+  };
 
   // STANDBY SCREEN
   if (powerState === 'standby') {
@@ -301,9 +486,12 @@ export default function App() {
 
   return (
     <div
-      className="w-full h-screen overflow-hidden relative bg-cover bg-center select-none bg-blue-500 font-tahoma"
-      style={{ backgroundImage: `url(${blissImage})` }}
+      className="w-full h-screen overflow-hidden relative select-none bg-blue-500 font-tahoma"
+      style={wallpaperStyle}
       onContextMenu={handleContextMenu}
+      onMouseDown={handleDesktopMouseDown}
+      onMouseMove={handleDesktopMouseMove}
+      onMouseUp={handleDesktopMouseUp}
       onClick={() => {
         setIsStartMenuOpen(false);
         setContextMenu(null);
@@ -312,6 +500,19 @@ export default function App() {
       <div id="boot-screen" className="transition-opacity duration-500 z-[10000] absolute inset-0">
         <BootScreen />
       </div>
+
+      {/* Desktop Rubberband Selection Marquee */}
+      {selectionBox && (
+        <div
+          className="absolute z-[10] border border-[#316AC5] bg-[#316AC5]/25 pointer-events-none"
+          style={{
+            left: Math.min(selectionBox.startX, selectionBox.currentX),
+            top: Math.min(selectionBox.startY, selectionBox.currentY),
+            width: Math.abs(selectionBox.currentX - selectionBox.startX),
+            height: Math.abs(selectionBox.currentY - selectionBox.startY),
+          }}
+        />
+      )}
 
       {/* Windows XP Login Screen */}
       {authState.isLocked && (
@@ -329,6 +530,7 @@ export default function App() {
             authStore.lockWorkstation();
           }}
           onLogOff={() => {
+            soundEffects.playShutdown();
             setIsLogOffOpen(false);
             // Close all open windows
             state.windows.forEach(w => systemBus.emit({ type: 'PROC_KILL', payload: { pid: w.pid } }));
@@ -403,6 +605,15 @@ export default function App() {
                 icon={iconDef.icon}
                 x={iconData.x}
                 y={iconData.y}
+                isSelected={selectedIconIds.includes(iconData.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (e.ctrlKey || e.metaKey) {
+                    setSelectedIconIds(prev => prev.includes(iconData.id) ? prev.filter(id => id !== iconData.id) : [...prev, iconData.id]);
+                  } else {
+                    setSelectedIconIds([iconData.id]);
+                  }
+                }}
                 onDoubleClick={() => openApp(iconData.appType, iconData.params)}
                 onMove={(x, y) => systemBus.emit({ type: 'ICON_MOVE', payload: { id: iconData.id, x, y } })}
               />
@@ -458,6 +669,7 @@ export default function App() {
             onClose={() => setIsStartMenuOpen(false)}
             onLogOffClick={() => setIsLogOffOpen(true)}
             onTurnOffClick={() => setIsTurnOffOpen(true)}
+            onRunClick={() => setIsRunDialogOpen(true)}
           />
         )}
         <Taskbar
@@ -472,8 +684,27 @@ export default function App() {
           }}
           onStartClick={() => setIsStartMenuOpen(!isStartMenuOpen)}
           isStartMenuOpen={isStartMenuOpen}
+          onOpenApp={openApp}
         />
       </div>
+
+      {/* Run Dialog (Alt+R / Win+R / Start Menu) */}
+      <RunDialog
+        isOpen={isRunDialogOpen}
+        onClose={() => setIsRunDialogOpen(false)}
+        onRun={handleRunCommand}
+      />
+
+      {/* Blue Screen of Death (BSOD) */}
+      {isBsodOpen && (
+        <BsodScreen
+          code={bsodCode}
+          onRestart={() => {
+            setIsBsodOpen(false);
+            systemBus.emit({ type: 'SYS_REBOOT' });
+          }}
+        />
+      )}
     </div>
   );
 }
