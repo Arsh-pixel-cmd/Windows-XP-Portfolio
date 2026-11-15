@@ -148,7 +148,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onTurn
 
                   {showHint && (
                     <div className="text-[11px] text-amber-300 bg-amber-950/60 p-2 rounded border border-amber-500/40 max-w-xs">
-                      💡 <b>Hint:</b> If Cloudflare is connected, use your <code>ADMIN_PASSWORD</code> secret. For default local mode, the password is <code>admin</code> or <code>arsh</code>.
+                      🔒 <b>Hint:</b> Enter the administrator master password configured in Cloudflare Secrets.
                     </div>
                   )}
 

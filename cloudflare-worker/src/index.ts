@@ -73,8 +73,10 @@ async function isAuthorized(request: Request, env: Env): Promise<boolean> {
   }
 
   // 2. Direct secret match if token matches hash of ADMIN_PASSWORD
-  const expectedSecret = env.ADMIN_PASSWORD || 'arsh-admin-2026';
-  const expectedToken = await sha256(expectedSecret);
+  if (!env.ADMIN_PASSWORD) {
+    return false;
+  }
+  const expectedToken = await sha256(env.ADMIN_PASSWORD);
   return token === expectedToken;
 }
 
@@ -108,9 +110,17 @@ export default {
 
       // 2. Auth: Login
       if (url.pathname === '/api/auth/login' && request.method === 'POST') {
-        const body = await request.json() as { password?: string };
+        const body = (await request.json()) as { password?: string };
         const password = body.password || '';
-        const adminPass = env.ADMIN_PASSWORD || 'arsh-admin-2026';
+
+        if (!password) {
+          return jsonResponse({ error: 'Password is required' }, 400, env);
+        }
+
+        const adminPass = env.ADMIN_PASSWORD;
+        if (!adminPass) {
+          return jsonResponse({ error: 'Server authentication secret not configured' }, 500, env);
+        }
 
         // Check if custom password in D1
         let valid = false;

@@ -23,11 +23,23 @@ dist-ssr
 *.sln
 *.sw?
 
+# Environment variables & secrets
+.env
+.env.*
 *.env
-*.env.local
-*.env.development.local
-*.env.test.local
-*.env.production.local
+*.env.*
+!.env.example
+.dev.vars
+**/.dev.vars
+
+# Cloudflare & Wrangler
+.wrangler/
+**/.wrangler/
+
+# Keys and certificates
+*.pem
+*.key
+*.cert
 
 # TypeScript
 *.tsbuildinfo

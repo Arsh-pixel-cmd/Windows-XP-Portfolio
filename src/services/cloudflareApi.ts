@@ -96,7 +96,7 @@ export class CloudflareService {
     if (!this.config.apiUrl) {
       // Local Master Key fallback if Cloudflare is not yet configured
       const localAdminPass = localStorage.getItem('xp_local_admin_pass') || 'admin';
-      if (password === localAdminPass || password === 'arsh') {
+      if (password === localAdminPass) {
         const localToken = `local-admin-${Date.now()}`;
         this.setToken(localToken);
         return { success: true, token: localToken };
