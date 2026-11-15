@@ -3,6 +3,21 @@
  * Backed by Cloudflare D1
  */
 
+// Cloudflare D1 Database interface declarations
+export interface D1PreparedStatement {
+  bind(...values: unknown[]): D1PreparedStatement;
+  first<T = Record<string, unknown>>(colName?: string): Promise<T | null>;
+  run<T = Record<string, unknown>>(): Promise<{ success: boolean; meta?: unknown; results?: T[] }>;
+  all<T = Record<string, unknown>>(): Promise<{ success: boolean; results: T[]; meta?: unknown }>;
+}
+
+export interface D1Database {
+  prepare(query: string): D1PreparedStatement;
+  dump(): Promise<ArrayBuffer>;
+  batch<T = unknown>(statements: D1PreparedStatement[]): Promise<Array<{ success: boolean; results?: T[] }>>;
+  exec(query: string): Promise<{ count: number; duration: number }>;
+}
+
 export interface Env {
   DB: D1Database;
   ADMIN_PASSWORD?: string; // Optional environment secret
