@@ -6,7 +6,7 @@ compatibility_date = "2024-04-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "portfolio-db"
-database_id = "your-database-id-here"
+database_id = "d63e8b40-a136-41b3-94a4-65be1c2f1688"
 
 [vars]
 # Default admin password hash or key can be set here or via `wrangler secret put ADMIN_PASSWORD`

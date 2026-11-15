@@ -21,7 +21,12 @@ export class CloudflareService {
     try {
       const saved = localStorage.getItem(CONFIG_KEY);
       if (saved) {
-        return { ...DEFAULT_CONFIG, ...JSON.parse(saved) };
+        const parsed = JSON.parse(saved);
+        return { 
+          ...DEFAULT_CONFIG, 
+          ...parsed,
+          apiUrl: parsed.apiUrl || DEFAULT_CONFIG.apiUrl,
+        };
       }
     } catch {
       // fallback

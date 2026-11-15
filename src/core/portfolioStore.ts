@@ -296,8 +296,11 @@ export const portfolioStore = {
     if (!remote) {
       return { success: false, error: 'Could not fetch data from Cloudflare Worker' };
     }
-    currentData = { ...remote, lastSyncedAt: Date.now() };
-    persistAndNotify();
+    // Only overwrite if remote actually has data populated
+    if (remote.profile || (remote.projects && remote.projects.length > 0)) {
+      currentData = { ...remote, lastSyncedAt: Date.now() };
+      persistAndNotify();
+    }
     return { success: true };
   },
 

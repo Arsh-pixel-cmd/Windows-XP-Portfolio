@@ -9,6 +9,7 @@
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "date-fns": "3.6.0",
     "lucide-react": "0.487.0",
     "motion": "12.23.24",

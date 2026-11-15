@@ -73,9 +73,22 @@ export default {
     }
 
     try {
-      // 1. Health / Ping
-      if (url.pathname === '/api/health' || url.pathname === '/health') {
-        return jsonResponse({ status: 'ok', time: Date.now(), d1Ready: Boolean(env.DB) }, 200, env);
+      // 1. Health / Ping / Root Info
+      if (url.pathname === '/' || url.pathname === '/api/health' || url.pathname === '/health') {
+        return jsonResponse({
+          status: 'ok',
+          service: 'Windows XP Portfolio API',
+          d1Ready: Boolean(env.DB),
+          time: Date.now(),
+          endpoints: [
+            '/api/portfolio',
+            '/api/health',
+            '/api/auth/login',
+            '/api/auth/verify',
+            '/api/portfolio/sync',
+            '/api/messages',
+          ],
+        }, 200, env);
       }
 
       // 2. Auth: Login
