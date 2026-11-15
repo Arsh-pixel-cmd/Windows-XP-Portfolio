@@ -21,6 +21,7 @@ const INITIAL_STATE_ICONS = [
   { id: 'resume', label: 'Resume.txt', appType: 'resume', x: 200, y: 20, params: { filePath: 'C:/Users/Arsh/Desktop/Resume.txt' } },
   { id: 'identity', label: 'Identity.exe', appType: 'identity', x: 200, y: 110 },
   { id: 'tips', label: 'Hints.exe', appType: 'tips', x: 200, y: 200 },
+  { id: 'admin', label: 'Admin.exe', appType: 'admin', x: 200, y: 290 },
 ];
 
 const loadInitialIcons = () => {

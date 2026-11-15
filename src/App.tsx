@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Folder, FileText, Mail, Monitor, Globe, FlaskConical, Layout, Cpu } from 'lucide-react';
+import { Folder, FileText, Mail, Monitor, Globe, FlaskConical, Layout, Cpu, Settings, AlertTriangle, User, HelpCircle } from 'lucide-react';
 import { DesktopIcon } from './components/DesktopIcon';
 import { Taskbar } from './components/Taskbar';
 import { Window } from './components/Window';
@@ -14,13 +14,18 @@ import { Experiments } from './components/Experiments';
 import { Notepad } from './components/Notepad';
 import { SystemMonitor } from './components/SystemMonitor';
 import { LogViewer } from './components/LogViewer';
-import { AlertTriangle, User, HelpCircle } from 'lucide-react';
 import { Identity } from './components/Identity';
 import { NavigationTips } from './components/NavigationTips';
+import { AdminPanel } from './components/AdminPanel';
+import { LoginScreen } from './components/LoginScreen';
+import { LogOffDialog } from './components/LogOffDialog';
+import { TurnOffDialog } from './components/TurnOffDialog';
 
 // Core
 import { systemStore } from './core/systemStore';
 import { systemBus } from './core/eventBus';
+import { authStore, AuthState } from './core/authStore';
+import { portfolioStore } from './core/portfolioStore';
 import { SystemState, Process } from './core/types';
 
 // XP Boot Screen Component
@@ -51,6 +56,7 @@ interface DesktopIconDefinition {
   appType: string;
   size: { width: number; height: number };
   params?: Record<string, unknown>;
+  adminOnly?: boolean;
 }
 
 interface LogIconProps {
@@ -152,16 +158,35 @@ const DESKTOP_ICONS: DesktopIconDefinition[] = [
     appType: 'tips',
     size: { width: 380, height: 480 }
   },
+  {
+    id: 'admin',
+    label: 'Admin.exe',
+    icon: <Settings size={32} className="text-orange-400 drop-shadow-md" fill="#F59E0B" />,
+    appType: 'admin',
+    size: { width: 750, height: 550 },
+    adminOnly: false,
+  },
 ];
 
 export default function App() {
   const [state, setState] = useState<SystemState>(systemStore.getState());
+  const [authState, setAuthState] = useState<AuthState>(authStore.getState());
   const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
 
+  // Dialogs
+  const [isLogOffOpen, setIsLogOffOpen] = useState(false);
+  const [isTurnOffOpen, setIsTurnOffOpen] = useState(false);
+  const [powerState, setPowerState] = useState<'running' | 'standby' | 'shutdown'>('running');
+
   useEffect(() => {
-    const unsub = systemStore.subscribe(setState);
-    return () => { unsub(); };
+    const unsubSystem = systemStore.subscribe(setState);
+    const unsubAuth = authStore.subscribe(setAuthState);
+    portfolioStore.fetchFromCloudflare().catch(() => {});
+    return () => { 
+      unsubSystem(); 
+      unsubAuth();
+    };
   }, []);
 
   const getComponentForApp = (appType: string) => {
@@ -178,11 +203,18 @@ export default function App() {
       case 'tips': return NavigationTips;
       case 'monitor': return SystemMonitor;
       case 'logviewer': return LogViewer;
+      case 'admin': return AdminPanel;
       default: return AboutMe;
     }
   };
 
   const openApp = useCallback((appType: string, params?: Record<string, unknown>) => {
+    // If opening admin but not signed in as admin, lock and prompt
+    if (appType === 'admin' && authState.session?.role !== 'admin') {
+      authStore.lockWorkstation();
+      return;
+    }
+
     const iconDef = DESKTOP_ICONS.find(i => i.appType === appType);
     if (iconDef) {
        systemBus.emit({
@@ -190,12 +222,13 @@ export default function App() {
          payload: { 
            appType, 
            title: iconDef.label, 
-           params: { ...iconDef.params, ...params } 
+           params: { ...iconDef.params, ...params, size: iconDef.size } 
          }
        });
     }
-  }, []);
+  }, [authState.session?.role]);
 
+  // Boot sequence
   useEffect(() => {
     const timer = setTimeout(() => {
       const bootScreen = document.getElementById('boot-screen');
@@ -203,12 +236,23 @@ export default function App() {
         bootScreen.style.opacity = '0';
         setTimeout(() => { bootScreen.style.display = 'none'; }, 500);
       }
-      openApp('logviewer');
-      setTimeout(() => openApp('identity'), 100);
-      setTimeout(() => openApp('tips'), 300);
+      // If already logged in, spawn initial windows
+      if (!authStore.getState().isLocked) {
+        openApp('logviewer');
+        setTimeout(() => openApp('identity'), 100);
+        setTimeout(() => openApp('tips'), 300);
+      }
     }, 2000);
     return () => clearTimeout(timer);
   }, [openApp]);
+
+  const handleLoginComplete = () => {
+    // Open default introductory windows after logging in
+    if (state.windows.length === 0) {
+      openApp('identity');
+      setTimeout(() => openApp('tips'), 150);
+    }
+  };
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -221,6 +265,39 @@ export default function App() {
     icon: DESKTOP_ICONS.find(i => i.appType === (state.processes.find(p => p.pid === w.pid) as Process)?.appType)?.icon || <FileText />,
     active: state.activeWindowId === w.id
   }));
+
+  // STANDBY SCREEN
+  if (powerState === 'standby') {
+    return (
+      <div 
+        className="fixed inset-0 bg-black z-[30000] flex flex-col items-center justify-center text-gray-500 font-tahoma cursor-pointer select-none"
+        onClick={() => setPowerState('running')}
+      >
+        <div className="w-4 h-4 bg-orange-500 rounded-full animate-ping mb-4" />
+        <p className="text-sm font-semibold">Windows XP is in Standby Mode</p>
+        <p className="text-xs text-gray-600 mt-1">Click anywhere or press any key to resume</p>
+      </div>
+    );
+  }
+
+  // SHUTDOWN SCREEN
+  if (powerState === 'shutdown') {
+    return (
+      <div className="fixed inset-0 bg-black z-[30000] flex flex-col items-center justify-center text-orange-500 font-tahoma select-none">
+        <p className="text-2xl font-bold tracking-tight mb-2">It is now safe to turn off your computer.</p>
+        <p className="text-xs text-gray-400 mb-6">All processes terminated and storage buffers flushed.</p>
+        <button
+          onClick={() => {
+            setPowerState('running');
+            systemBus.emit({ type: 'SYS_REBOOT' });
+          }}
+          className="xp-button px-6 py-2 text-sm font-bold text-white bg-blue-600"
+        >
+          Restart Computer
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -235,6 +312,50 @@ export default function App() {
       <div id="boot-screen" className="transition-opacity duration-500 z-[10000] absolute inset-0">
         <BootScreen />
       </div>
+
+      {/* Windows XP Login Screen */}
+      {authState.isLocked && (
+        <LoginScreen
+          onLoginSuccess={handleLoginComplete}
+          onTurnOff={() => setIsTurnOffOpen(true)}
+        />
+      )}
+
+      {/* Log Off Dialog */}
+      {isLogOffOpen && (
+        <LogOffDialog
+          onSwitchUser={() => {
+            setIsLogOffOpen(false);
+            authStore.lockWorkstation();
+          }}
+          onLogOff={() => {
+            setIsLogOffOpen(false);
+            // Close all open windows
+            state.windows.forEach(w => systemBus.emit({ type: 'PROC_KILL', payload: { pid: w.pid } }));
+            authStore.logOff();
+          }}
+          onCancel={() => setIsLogOffOpen(false)}
+        />
+      )}
+
+      {/* Turn Off Dialog */}
+      {isTurnOffOpen && (
+        <TurnOffDialog
+          onStandBy={() => {
+            setIsTurnOffOpen(false);
+            setPowerState('standby');
+          }}
+          onTurnOff={() => {
+            setIsTurnOffOpen(false);
+            setPowerState('shutdown');
+          }}
+          onRestart={() => {
+            setIsTurnOffOpen(false);
+            systemBus.emit({ type: 'SYS_REBOOT' });
+          }}
+          onCancel={() => setIsTurnOffOpen(false)}
+        />
+      )}
 
       {/* Overload Indicator */}
       {state.resources.isBlocked && (
@@ -255,8 +376,8 @@ export default function App() {
         >
           <div className="px-4 py-1 hover:bg-[#316AC5] hover:text-white cursor-default" onClick={() => systemBus.emit({ type: 'SYS_REBOOT' })}>Refresh</div>
           <div className="h-[1px] bg-gray-300 my-1 mx-1" />
-          <div className="px-4 py-1 hover:bg-[#316AC5] hover:text-white cursor-default">New</div>
-          <div className="px-4 py-1 hover:bg-[#316AC5] hover:text-white cursor-default">Properties</div>
+          <div className="px-4 py-1 hover:bg-[#316AC5] hover:text-white cursor-default" onClick={() => openApp('admin')}>Admin Console</div>
+          <div className="px-4 py-1 hover:bg-[#316AC5] hover:text-white cursor-default" onClick={() => authStore.lockWorkstation()}>Lock Workstation</div>
         </div>
       )}
 
@@ -265,7 +386,14 @@ export default function App() {
         className="absolute top-0 left-0 w-full h-[calc(100vh-40px)] z-0 pointer-events-none" 
         onClick={e => e.stopPropagation()}
       >
-        {state.desktopIcons.map(iconData => {
+        {state.desktopIcons
+          .filter(iconData => {
+            if (iconData.appType === 'admin') {
+              return authState.session?.role === 'admin';
+            }
+            return true;
+          })
+          .map(iconData => {
           const iconDef = DESKTOP_ICONS.find(i => i.appType === iconData.appType);
           if (!iconDef) return null;
           return (
@@ -327,7 +455,9 @@ export default function App() {
           <StartMenu 
             onOpenApp={openApp} 
             onRefreshDesktop={() => systemBus.emit({ type: 'SYS_REFRESH' })}
-            onClose={() => setIsStartMenuOpen(false)} 
+            onClose={() => setIsStartMenuOpen(false)}
+            onLogOffClick={() => setIsLogOffOpen(true)}
+            onTurnOffClick={() => setIsTurnOffOpen(true)}
           />
         )}
         <Taskbar
