@@ -28,6 +28,7 @@ import { FileExplorer } from './components/FileExplorer';
 import { ControlPanel } from './components/ControlPanel';
 import { RunDialog } from './components/RunDialog';
 import { BsodScreen } from './components/BsodScreen';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Core
 import { systemStore } from './core/systemStore';
@@ -181,6 +182,7 @@ const DESKTOP_ICONS: DesktopIconDefinition[] = [
     icon: <Computer size={32} className="text-blue-500 drop-shadow-md" fill="#2563EB" />,
     appType: 'explorer',
     size: { width: 680, height: 460 },
+    params: { initialPath: 'C:' },
   },
   {
     id: 'recycle',
@@ -651,10 +653,12 @@ export default function App() {
               onMove={(x, y) => systemBus.emit({ type: 'WIN_MOVE', payload: { id: w.id, x, y } })}
               onResize={(width, height) => systemBus.emit({ type: 'WIN_RESIZE', payload: { id: w.id, width, height } })}
             >
-              <AppComponent 
-                process={process}
-                systemState={state}
-              />
+              <ErrorBoundary fallbackTitle={w.title}>
+                <AppComponent 
+                  process={process}
+                  systemState={state}
+                />
+              </ErrorBoundary>
             </Window>
           );
         })}

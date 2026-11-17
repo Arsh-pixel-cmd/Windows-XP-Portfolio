@@ -9,7 +9,7 @@ import { systemScheduler } from './scheduler';
 const SYSTEM_VERSION = '1.0.0';
 
 const INITIAL_STATE_ICONS = [
-  { id: 'explorer', label: 'My Computer', appType: 'explorer', x: 20, y: 20 },
+  { id: 'explorer', label: 'My Computer', appType: 'explorer', x: 20, y: 20, params: { initialPath: 'C:' } },
   { id: 'recycle', label: 'Recycle Bin', appType: 'recycle', x: 20, y: 110, params: { initialPath: 'C:/RecycleBin' } },
   { id: 'about', label: 'About.exe', appType: 'about', x: 20, y: 200 },
   { id: 'projects', label: 'Projects.exe', appType: 'projects', x: 20, y: 290 },
@@ -161,6 +161,12 @@ function kernelReducer(state: SystemState, event: SystemEvent): SystemState {
       const windowId = `${event.payload.appType}_${pid}`;
       const newProcess = createProcessInstance(pid, event.payload.title, event.payload.appType, windowId, event.payload.params);
       
+      const sizeParam = event.payload.params?.size as { width?: number; height?: number } | undefined;
+      const size: { width: number; height: number } = {
+        width: typeof sizeParam?.width === 'number' ? sizeParam.width : 500,
+        height: typeof sizeParam?.height === 'number' ? sizeParam.height : 400
+      };
+
       const newWindow = {
         id: windowId,
         pid,
@@ -170,7 +176,7 @@ function kernelReducer(state: SystemState, event: SystemEvent): SystemState {
         isMinimized: false,
         isMaximized: false,
         position: { x: 100 + (state.windows.length % 5) * 30, y: 100 + (state.windows.length % 5) * 30 },
-        size: event.payload.params?.size || { width: 500, height: 400 }
+        size
       };
 
       return {

@@ -6,7 +6,7 @@ import {
   Plus, CornerDownRight, Cpu
 } from 'lucide-react';
 import { Process, SystemState, FileNode } from '../core/types';
-import { resolvePath, listDirectory } from '../core/vfs';
+import { resolvePath } from '../core/vfs';
 import { systemBus } from '../core/eventBus';
 import { soundEffects } from '../core/soundEffects';
 
@@ -18,7 +18,7 @@ interface FileExplorerProps {
 export const FileExplorer: React.FC<FileExplorerProps> = ({ process, systemState }) => {
   const initialPath = (typeof process.params?.initialPath === 'string' && process.params.initialPath)
     ? process.params.initialPath
-    : 'C:/Users/Arsh';
+    : (process.appType === 'recycle' ? 'C:/RecycleBin' : 'C:');
 
   const [currentPath, setCurrentPath] = useState<string>(initialPath);
   const [history, setHistory] = useState<string[]>([initialPath]);
@@ -28,13 +28,13 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ process, systemState
   const [isCreatingFolder, setIsCreatingFolder] = useState<boolean>(false);
   const [newItemName, setNewItemName] = useState<string>('');
 
-  // Get current node and children
+  // Get current node and children safely as FileNode[]
   let currentNode: FileNode | null = null;
   let items: FileNode[] = [];
   try {
     currentNode = resolvePath(systemState.fileSystem, currentPath);
-    if (currentNode.type === 'directory') {
-      items = listDirectory(systemState.fileSystem, currentPath);
+    if (currentNode && currentNode.type === 'directory') {
+      items = currentNode.children || [];
     }
   } catch {
     // Fallback if path doesn't exist
@@ -70,8 +70,9 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ process, systemState
   };
 
   const handleUp = () => {
-    if (currentPath === 'C:' || currentPath === 'C:/') return;
-    const parts = currentPath.split('/').filter(Boolean);
+    const clean = currentPath.replace(/\/+$/, '');
+    if (clean === 'C:' || clean === 'C') return;
+    const parts = clean.split('/').filter(Boolean);
     parts.pop();
     const parent = parts.join('/') || 'C:';
     navigateTo(parent);
@@ -82,14 +83,15 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ process, systemState
   };
 
   const handleItemDoubleClick = (node: FileNode) => {
+    const cleanDir = currentPath.replace(/\/+$/, '');
     if (node.type === 'directory') {
-      const nextPath = currentPath.endsWith('/') ? `${currentPath}${node.name}` : `${currentPath}/${node.name}`;
+      const nextPath = `${cleanDir}/${node.name}`;
       navigateTo(nextPath);
     } else {
       soundEffects.playClick();
       // Handle file opening
-      const fullFilePath = `${currentPath}/${node.name}`;
-      if (node.name.endsWith('.txt')) {
+      const fullFilePath = `${cleanDir}/${node.name}`;
+      if (node.name?.endsWith('.txt')) {
         systemBus.emit({
           type: 'PROC_START',
           payload: {
@@ -98,7 +100,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ process, systemState
             params: { filePath: fullFilePath }
           }
         });
-      } else if (node.name.endsWith('.exe')) {
+      } else if (node.name?.endsWith('.exe')) {
         const appType = node.name.replace('.exe', '').toLowerCase();
         systemBus.emit({
           type: 'PROC_START',
@@ -114,7 +116,8 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ process, systemState
   const handleCreateNewFolder = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newItemName.trim()) return;
-    const targetPath = `${currentPath}/${newItemName.trim()}`;
+    const cleanDir = currentPath.replace(/\/+$/, '');
+    const targetPath = `${cleanDir}/${newItemName.trim()}`;
     systemBus.emit({
       type: 'FS_CREATE_DIR',
       payload: { path: targetPath }
@@ -127,7 +130,8 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ process, systemState
   const handleDeleteSelected = () => {
     if (!selectedNode) return;
     soundEffects.playRecycle();
-    const targetPath = `${currentPath}/${selectedNode.name}`;
+    const cleanDir = currentPath.replace(/\/+$/, '');
+    const targetPath = `${cleanDir}/${selectedNode.name}`;
     systemBus.emit({
       type: 'FS_DELETE',
       payload: { path: targetPath }
@@ -375,7 +379,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ process, systemState
                   >
                     {item.type === 'directory' ? (
                       <Folder size={38} className={isSelected ? 'text-white' : 'text-yellow-500 drop-shadow-sm'} />
-                    ) : item.name.endsWith('.exe') ? (
+                    ) : item.name?.endsWith('.exe') ? (
                       <Cpu size={36} className={isSelected ? 'text-white' : 'text-blue-600 drop-shadow-sm'} />
                     ) : (
                       <FileText size={36} className={isSelected ? 'text-white' : 'text-gray-500 drop-shadow-sm'} />

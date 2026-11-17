@@ -75,7 +75,8 @@ export const Window: React.FC<WindowProps> = React.memo(({
           return;
         }
         // 3. Right edge snap -> Half screen right
-        if (newX + size.width >= window.innerWidth - 12) {
+        const currentWidth = (size && typeof size.width === 'number') ? size.width : 500;
+        if (newX + currentWidth >= window.innerWidth - 12) {
           const halfWidth = Math.floor(window.innerWidth / 2);
           onMove(halfWidth, 0);
           onResize(halfWidth, window.innerHeight - 30);
