@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Globe, Mail,
+  Mail,
   Settings, Search, HelpCircle,
   Power, Folder, FileText, 
-  Computer, HardDrive, Monitor, FlaskConical, Cpu, ShieldAlert, User as UserIcon
+  Computer, HardDrive, Monitor, FlaskConical, Cpu, ShieldAlert, User as UserIcon,
+  Globe2, Disc, Bomb
 } from 'lucide-react';
 import { authStore } from '../core/authStore';
 import { UserSession } from '../types/portfolio';
@@ -66,15 +67,13 @@ export const StartMenu: React.FC<StartMenuProps> = ({
         <div className="w-[55%] flex flex-col p-1.5 gap-0.5 border-r border-[#91B2E6]">
           {/* Top Programs */}
           <div 
-            onClick={() => { onOpenApp('terminal'); onClose(); }}
+            onClick={() => { onOpenApp('browser'); onClose(); }}
             className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm active:translate-y-[1px] transition-all"
           >
-            <div className="bg-black p-1 rounded">
-               <Globe className="text-white w-6 h-6" />
-            </div>
+            <Globe2 className="text-[#0284C7] group-hover:text-white w-8 h-8" />
             <div className="flex flex-col">
-              <span className="font-bold text-[13px]">Command Prompt</span>
-              <span className="text-[11px] text-gray-500 group-hover:text-blue-100">cmd.exe</span>
+              <span className="font-bold text-[13px]">Internet</span>
+              <span className="text-[11px] text-gray-500 group-hover:text-blue-100">Internet Explorer</span>
             </div>
           </div>
           <div 
@@ -83,7 +82,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({
           >
             <Mail className="text-[#2F71CD] group-hover:text-white w-8 h-8" />
             <div className="flex flex-col">
-              <span className="font-bold text-[13px]">Contact Me</span>
+              <span className="font-bold text-[13px]">E-mail</span>
               <span className="text-[11px] text-gray-500 group-hover:text-blue-100">Outlook Express</span>
             </div>
           </div>
@@ -91,6 +90,20 @@ export const StartMenu: React.FC<StartMenuProps> = ({
           <div className="h-[1px] bg-gray-200 my-1 mx-2" />
 
           {/* Frequent Programs */}
+          <div 
+            onClick={() => { onOpenApp('mediaplayer'); onClose(); }}
+            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
+          >
+            <Disc className="text-orange-500 group-hover:text-white w-8 h-8" />
+            <span className="text-[13px]">Windows Media Player</span>
+          </div>
+          <div 
+            onClick={() => { onOpenApp('minesweeper'); onClose(); }}
+            className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"
+          >
+            <Bomb className="text-slate-800 group-hover:text-white w-8 h-8" />
+            <span className="text-[13px]">Minesweeper</span>
+          </div>
           <div 
             onClick={() => { onOpenApp('projects'); onClose(); }}
             className="flex items-center gap-2 p-1.5 hover:bg-[#2F71CD] hover:text-white cursor-default group rounded-sm"

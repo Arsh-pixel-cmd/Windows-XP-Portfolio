@@ -25,6 +25,9 @@ const INITIAL_STATE_ICONS = [
   { id: 'identity', label: 'Identity.exe', appType: 'identity', x: 200, y: 110 },
   { id: 'tips', label: 'Hints.exe', appType: 'tips', x: 200, y: 200 },
   { id: 'admin', label: 'Admin.exe', appType: 'admin', x: 200, y: 290 },
+  { id: 'browser', label: 'Internet Explorer', appType: 'browser', x: 290, y: 20 },
+  { id: 'mediaplayer', label: 'Media Player', appType: 'mediaplayer', x: 290, y: 110 },
+  { id: 'minesweeper', label: 'Minesweeper', appType: 'minesweeper', x: 290, y: 200 },
 ];
 
 const loadInitialIcons = () => {

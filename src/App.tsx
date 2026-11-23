@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
   Folder, FileText, Mail, Monitor, Globe, FlaskConical, 
   Layout, Cpu, Settings, AlertTriangle, User, HelpCircle,
-  Computer, Trash2
+  Computer, Trash2, Globe2, Disc, Bomb
 } from 'lucide-react';
 import { DesktopIcon } from './components/DesktopIcon';
 import { Taskbar } from './components/Taskbar';
@@ -29,6 +29,9 @@ import { ControlPanel } from './components/ControlPanel';
 import { RunDialog } from './components/RunDialog';
 import { BsodScreen } from './components/BsodScreen';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { Minesweeper } from './components/Minesweeper';
+import { InternetExplorer } from './components/InternetExplorer';
+import { MediaPlayer } from './components/MediaPlayer';
 
 // Core
 import { systemStore } from './core/systemStore';
@@ -199,6 +202,27 @@ const DESKTOP_ICONS: DesktopIconDefinition[] = [
     appType: 'control',
     size: { width: 620, height: 480 },
   },
+  {
+    id: 'browser',
+    label: 'Internet Explorer',
+    icon: <Globe2 size={32} className="text-blue-500 drop-shadow-md" fill="#0284C7" />,
+    appType: 'browser',
+    size: { width: 780, height: 540 },
+  },
+  {
+    id: 'mediaplayer',
+    label: 'Media Player',
+    icon: <Disc size={32} className="text-orange-500 drop-shadow-md" fill="#EA580C" />,
+    appType: 'mediaplayer',
+    size: { width: 620, height: 440 },
+  },
+  {
+    id: 'minesweeper',
+    label: 'Minesweeper',
+    icon: <Bomb size={32} className="text-gray-800 drop-shadow-md" fill="#1E293B" />,
+    appType: 'minesweeper',
+    size: { width: 320, height: 410 },
+  },
 ];
 
 export default function App() {
@@ -282,6 +306,9 @@ export default function App() {
       case 'explorer': return FileExplorer;
       case 'recycle': return FileExplorer;
       case 'control': return ControlPanel;
+      case 'browser': return InternetExplorer;
+      case 'mediaplayer': return MediaPlayer;
+      case 'minesweeper': return Minesweeper;
       default: return AboutMe;
     }
   };
@@ -371,6 +398,19 @@ export default function App() {
       'identity': 'identity',
       'tips': 'tips',
       'hints': 'tips',
+      'iexplore': 'browser',
+      'iexplore.exe': 'browser',
+      'browser': 'browser',
+      'internet': 'browser',
+      'wmplayer': 'mediaplayer',
+      'wmplayer.exe': 'mediaplayer',
+      'mediaplayer': 'mediaplayer',
+      'media': 'mediaplayer',
+      'music': 'mediaplayer',
+      'winmine': 'minesweeper',
+      'winmine.exe': 'minesweeper',
+      'minesweeper': 'minesweeper',
+      'mine': 'minesweeper',
     };
 
     const appType = appMap[trimmed];
