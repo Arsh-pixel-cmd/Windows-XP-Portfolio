@@ -1,7 +1,7 @@
 // src/types/ai.ts
 import { ProjectItem, ProfileData, ExperimentItem } from './portfolio';
 
-export type AiProvider = 'gemini' | 'groq' | 'openai';
+export type AiProvider = 'openrouter' | 'gemini' | 'groq' | 'openai';
 
 export interface AiConfig {
   provider: AiProvider;

@@ -1,13 +1,16 @@
 // src/services/portfolioAiService.ts
 import { PortfolioData } from '../types/portfolio';
-import { AiConfig, AiResponsePayload, PortfolioAiAction } from '../types/ai';
+import { AiConfig, AiProvider, AiResponsePayload, PortfolioAiAction } from '../types/ai';
 import { portfolioStore } from '../core/portfolioStore';
 
 const AI_CONFIG_KEY = 'xp_ai_config';
 
-function getEnvKeyForProvider(provider: 'gemini' | 'groq' | 'openai'): string {
+function getEnvKeyForProvider(provider: AiProvider): string {
   try {
     const env = (import.meta as unknown as { env?: Record<string, string> }).env || {};
+    if (provider === 'openrouter') {
+      return env.VITE_OPENROUTER_API_KEY || '';
+    }
     if (provider === 'gemini') {
       return env.VITE_GEMINI_API_KEY || '';
     }
@@ -15,7 +18,7 @@ function getEnvKeyForProvider(provider: 'gemini' | 'groq' | 'openai'): string {
       return env.VITE_GROQ_API_KEY || '';
     }
     if (provider === 'openai') {
-      return env.VITE_OPENAI_API_KEY || env.VITE_GEMINI_API_KEY || '';
+      return env.VITE_OPENAI_API_KEY || '';
     }
   } catch {
     // fallback
@@ -25,11 +28,30 @@ function getEnvKeyForProvider(provider: 'gemini' | 'groq' | 'openai'): string {
 
 function detectDefaultConfig(): AiConfig {
   const env = (import.meta as unknown as { env?: Record<string, string> }).env || {};
+  const envOpenRouter = env.VITE_OPENROUTER_API_KEY || '';
   const envOpenAi = env.VITE_OPENAI_API_KEY || '';
   const envGemini = env.VITE_GEMINI_API_KEY || '';
   const envGroq = env.VITE_GROQ_API_KEY || '';
 
-  // 1. Check if OpenAI key is present (starts with 'sk-')
+  // 1. Check OpenRouter key (starts with 'sk-or-')
+  if (envOpenRouter.trim().startsWith('sk-or-') || envOpenAi.trim().startsWith('sk-or-') || envGemini.trim().startsWith('sk-or-')) {
+    const key = (
+      envOpenRouter.trim().startsWith('sk-or-')
+        ? envOpenRouter
+        : envOpenAi.trim().startsWith('sk-or-')
+        ? envOpenAi
+        : envGemini
+    ).trim();
+    return {
+      provider: 'openrouter',
+      apiKey: key,
+      model: 'google/gemini-2.0-flash-exp:free',
+      autoApply: false,
+      autoSyncDb: true,
+    };
+  }
+
+  // 2. Check OpenAI key (starts with 'sk-')
   if (envOpenAi.trim().startsWith('sk-') || envGemini.trim().startsWith('sk-')) {
     const key = (envOpenAi.trim().startsWith('sk-') ? envOpenAi : envGemini).trim();
     return {
@@ -41,7 +63,7 @@ function detectDefaultConfig(): AiConfig {
     };
   }
 
-  // 2. Check Groq
+  // 3. Check Groq
   if (envGroq.trim().startsWith('gsk_') || envGemini.trim().startsWith('gsk_')) {
     const key = (envGroq.trim().startsWith('gsk_') ? envGroq : envGemini).trim();
     return {
@@ -53,7 +75,7 @@ function detectDefaultConfig(): AiConfig {
     };
   }
 
-  // 3. Normal Gemini key
+  // 4. Normal Gemini key
   if (envGemini.trim()) {
     return {
       provider: 'gemini',
@@ -66,9 +88,9 @@ function detectDefaultConfig(): AiConfig {
 
   // Fallback default
   return {
-    provider: 'openai',
+    provider: 'openrouter',
     apiKey: '',
-    model: 'gpt-4o-mini',
+    model: 'google/gemini-2.0-flash-exp:free',
     autoApply: false,
     autoSyncDb: true,
   };
@@ -88,13 +110,18 @@ export class PortfolioAiService {
       if (saved) {
         const parsed = JSON.parse(saved);
         const effectiveKey = (parsed.apiKey || defaults.apiKey || '').trim();
-        let provider = parsed.provider || defaults.provider;
+        let provider: AiProvider = parsed.provider || defaults.provider;
         let model = parsed.model || defaults.model;
 
-        // Auto-correct provider if key clearly identifies it
-        if (effectiveKey.startsWith('sk-')) {
+        // Auto-correct provider based on key format
+        if (effectiveKey.startsWith('sk-or-')) {
+          provider = 'openrouter';
+          if (!model || !model.includes('/')) {
+            model = 'google/gemini-2.0-flash-exp:free';
+          }
+        } else if (effectiveKey.startsWith('sk-')) {
           provider = 'openai';
-          if (!model || model.startsWith('gemini') || model.startsWith('llama')) {
+          if (!model || model.startsWith('gemini') || model.startsWith('llama') || model.includes('/')) {
             model = 'gpt-4o-mini';
           }
         } else if (effectiveKey.startsWith('gsk_')) {
@@ -173,7 +200,7 @@ CRITICAL RULES:
 
   async processPrompt(userPrompt: string, currentPortfolio: PortfolioData): Promise<AiResponsePayload> {
     const config = this.getConfig();
-    let provider = config.provider;
+    let provider: AiProvider = config.provider;
     let model = config.model;
 
     const defaults = detectDefaultConfig();
@@ -188,7 +215,12 @@ CRITICAL RULES:
     }
 
     // Auto-detect provider by key pattern to avoid misconfiguration errors
-    if (effectiveApiKey.startsWith('sk-') && provider !== 'openai') {
+    if (effectiveApiKey.startsWith('sk-or-')) {
+      provider = 'openrouter';
+      if (!model || !model.includes('/')) {
+        model = 'google/gemini-2.0-flash-exp:free';
+      }
+    } else if (effectiveApiKey.startsWith('sk-') && provider !== 'openai') {
       provider = 'openai';
       if (!model || model.startsWith('gemini') || model.startsWith('llama')) {
         model = 'gpt-4o-mini';
@@ -204,7 +236,9 @@ CRITICAL RULES:
 
     let rawJsonText = '';
 
-    if (provider === 'gemini') {
+    if (provider === 'openrouter') {
+      rawJsonText = await this.callOpenRouter(effectiveApiKey, model || 'google/gemini-2.0-flash-exp:free', systemPrompt, userPrompt);
+    } else if (provider === 'gemini') {
       rawJsonText = await this.callGemini(effectiveApiKey, model || 'gemini-1.5-flash', systemPrompt, userPrompt);
     } else if (provider === 'groq') {
       rawJsonText = await this.callGroq(effectiveApiKey, model || 'llama-3.3-70b-versatile', systemPrompt, userPrompt);
@@ -215,6 +249,42 @@ CRITICAL RULES:
     }
 
     return this.parseAndValidateResponse(rawJsonText);
+  }
+
+  private async callOpenRouter(apiKey: string, model: string, systemPrompt: string, userPrompt: string): Promise<string> {
+    const endpoint = 'https://openrouter.ai/api/v1/chat/completions';
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey.trim()}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173',
+        'X-Title': 'Windows XP Portfolio Copilot',
+      },
+      body: JSON.stringify({
+        model: model || 'google/gemini-2.0-flash-exp:free',
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        temperature: 0.2,
+      }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => null);
+      const errMsg = errorData?.error?.message || `HTTP ${res.status} ${res.statusText}`;
+      throw new Error(`OpenRouter API Error: ${errMsg}`);
+    }
+
+    const data = await res.json();
+    const content = data?.choices?.[0]?.message?.content;
+    if (!content) {
+      throw new Error('OpenRouter returned an empty response.');
+    }
+    return content;
   }
 
   private async callGemini(apiKey: string, model: string, systemPrompt: string, userPrompt: string): Promise<string> {

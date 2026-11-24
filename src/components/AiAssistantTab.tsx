@@ -398,14 +398,21 @@ export const AiAssistantTab: React.FC<AiAssistantTabProps> = ({ portfolioData, o
                 onChange={e => {
                   const p = e.target.value as AiProvider;
                   const defaultModel =
-                    p === 'gemini' ? 'gemini-1.5-flash' : p === 'groq' ? 'llama-3.3-70b-versatile' : 'gpt-4o-mini';
+                    p === 'openrouter'
+                      ? 'google/gemini-2.0-flash-exp:free'
+                      : p === 'gemini'
+                      ? 'gemini-1.5-flash'
+                      : p === 'groq'
+                      ? 'llama-3.3-70b-versatile'
+                      : 'gpt-4o-mini';
                   setConfig({ ...config, provider: p, model: defaultModel });
                 }}
                 className="w-full border border-gray-300 rounded px-2 py-1.5 bg-gray-50 text-xs focus:ring-1 focus:ring-indigo-500 outline-none"
               >
-                <option value="gemini">Google Gemini (Recommended / Free Tier)</option>
+                <option value="openrouter">OpenRouter (Recommended - Free Models Available)</option>
+                <option value="gemini">Google Gemini (Free Tier via AI Studio)</option>
                 <option value="groq">Groq (Ultra-Fast LPU)</option>
-                <option value="openai">OpenAI (GPT-4o Mini / GPT-4o)</option>
+                <option value="openai">OpenAI (Direct API)</option>
               </select>
             </div>
 
@@ -468,6 +475,16 @@ export const AiAssistantTab: React.FC<AiAssistantTabProps> = ({ portfolioData, o
               <label className="font-semibold text-gray-700">
                 {config.provider.toUpperCase()} API Key:
               </label>
+              {config.provider === 'openrouter' && (
+                <a
+                  href="https://openrouter.ai/keys"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-purple-600 hover:underline flex items-center gap-1 text-[11px]"
+                >
+                  Get OpenRouter Key (Supports Free Models) <ExternalLink size={10} />
+                </a>
+              )}
               {config.provider === 'openai' && (
                 <a
                   href="https://platform.openai.com/api-keys"
