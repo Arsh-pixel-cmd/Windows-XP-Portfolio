@@ -61,7 +61,7 @@ export const Minesweeper: React.FC = () => {
   const [isCellMouseDown, setIsCellMouseDown] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const initBoard = useCallback((diff: Difficulty) => {
     const { rows, cols, mines } = CONFIGS[diff];

@@ -7,14 +7,15 @@ const AI_CONFIG_KEY = 'xp_ai_config';
 
 function getEnvKeyForProvider(provider: 'gemini' | 'groq' | 'openai'): string {
   try {
+    const env = (import.meta as unknown as { env?: Record<string, string> }).env || {};
     if (provider === 'gemini') {
-      return (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_GEMINI_API_KEY || '';
+      return env.VITE_GEMINI_API_KEY || '';
     }
     if (provider === 'groq') {
-      return (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_GROQ_API_KEY || '';
+      return env.VITE_GROQ_API_KEY || '';
     }
     if (provider === 'openai') {
-      return (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_OPENAI_API_KEY || '';
+      return env.VITE_OPENAI_API_KEY || env.VITE_GEMINI_API_KEY || '';
     }
   } catch {
     // fallback
@@ -22,12 +23,56 @@ function getEnvKeyForProvider(provider: 'gemini' | 'groq' | 'openai'): string {
   return '';
 }
 
-const DEFAULT_CONFIG: AiConfig = {
-  provider: 'gemini',
-  apiKey: getEnvKeyForProvider('gemini'),
-  model: 'gemini-1.5-flash',
-  autoApply: false,
-};
+function detectDefaultConfig(): AiConfig {
+  const env = (import.meta as unknown as { env?: Record<string, string> }).env || {};
+  const envOpenAi = env.VITE_OPENAI_API_KEY || '';
+  const envGemini = env.VITE_GEMINI_API_KEY || '';
+  const envGroq = env.VITE_GROQ_API_KEY || '';
+
+  // 1. Check if OpenAI key is present (starts with 'sk-')
+  if (envOpenAi.trim().startsWith('sk-') || envGemini.trim().startsWith('sk-')) {
+    const key = (envOpenAi.trim().startsWith('sk-') ? envOpenAi : envGemini).trim();
+    return {
+      provider: 'openai',
+      apiKey: key,
+      model: 'gpt-4o-mini',
+      autoApply: false,
+      autoSyncDb: true,
+    };
+  }
+
+  // 2. Check Groq
+  if (envGroq.trim().startsWith('gsk_') || envGemini.trim().startsWith('gsk_')) {
+    const key = (envGroq.trim().startsWith('gsk_') ? envGroq : envGemini).trim();
+    return {
+      provider: 'groq',
+      apiKey: key,
+      model: 'llama-3.3-70b-versatile',
+      autoApply: false,
+      autoSyncDb: true,
+    };
+  }
+
+  // 3. Normal Gemini key
+  if (envGemini.trim()) {
+    return {
+      provider: 'gemini',
+      apiKey: envGemini.trim(),
+      model: 'gemini-1.5-flash',
+      autoApply: false,
+      autoSyncDb: true,
+    };
+  }
+
+  // Fallback default
+  return {
+    provider: 'openai',
+    apiKey: '',
+    model: 'gpt-4o-mini',
+    autoApply: false,
+    autoSyncDb: true,
+  };
+}
 
 export class PortfolioAiService {
   private config: AiConfig;
@@ -37,23 +82,41 @@ export class PortfolioAiService {
   }
 
   loadConfig(): AiConfig {
+    const defaults = detectDefaultConfig();
     try {
       const saved = localStorage.getItem(AI_CONFIG_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        const provider = parsed.provider || DEFAULT_CONFIG.provider;
-        const envKey = getEnvKeyForProvider(provider);
+        const effectiveKey = (parsed.apiKey || defaults.apiKey || '').trim();
+        let provider = parsed.provider || defaults.provider;
+        let model = parsed.model || defaults.model;
+
+        // Auto-correct provider if key clearly identifies it
+        if (effectiveKey.startsWith('sk-')) {
+          provider = 'openai';
+          if (!model || model.startsWith('gemini') || model.startsWith('llama')) {
+            model = 'gpt-4o-mini';
+          }
+        } else if (effectiveKey.startsWith('gsk_')) {
+          provider = 'groq';
+          if (!model || model.startsWith('gemini') || model.startsWith('gpt')) {
+            model = 'llama-3.3-70b-versatile';
+          }
+        }
+
         return {
-          ...DEFAULT_CONFIG,
+          ...defaults,
           ...parsed,
-          apiKey: parsed.apiKey || envKey,
+          provider,
+          model,
+          apiKey: effectiveKey,
+          autoSyncDb: parsed.autoSyncDb !== undefined ? parsed.autoSyncDb : true,
         };
       }
     } catch {
       // fallback
     }
-    const envKey = getEnvKeyForProvider(DEFAULT_CONFIG.provider);
-    return { ...DEFAULT_CONFIG, apiKey: envKey };
+    return defaults;
   }
 
   saveConfig(updates: Partial<AiConfig>): AiConfig {
@@ -110,28 +173,45 @@ CRITICAL RULES:
 
   async processPrompt(userPrompt: string, currentPortfolio: PortfolioData): Promise<AiResponsePayload> {
     const config = this.getConfig();
+    let provider = config.provider;
+    let model = config.model;
+
+    const defaults = detectDefaultConfig();
     const effectiveApiKey = (
-      config.apiKey || getEnvKeyForProvider(config.provider as 'gemini' | 'groq' | 'openai') || ''
+      config.apiKey || getEnvKeyForProvider(provider) || defaults.apiKey || ''
     ).trim();
 
     if (!effectiveApiKey) {
       throw new Error(
-        `API Key for ${config.provider.toUpperCase()} is missing. Please enter your API Key in the settings or add it to .env.`
+        `API Key is missing. Please enter your API Key in the settings or add it to .env.`
       );
+    }
+
+    // Auto-detect provider by key pattern to avoid misconfiguration errors
+    if (effectiveApiKey.startsWith('sk-') && provider !== 'openai') {
+      provider = 'openai';
+      if (!model || model.startsWith('gemini') || model.startsWith('llama')) {
+        model = 'gpt-4o-mini';
+      }
+    } else if (effectiveApiKey.startsWith('gsk_') && provider !== 'groq') {
+      provider = 'groq';
+      if (!model || model.startsWith('gemini') || model.startsWith('gpt')) {
+        model = 'llama-3.3-70b-versatile';
+      }
     }
 
     const systemPrompt = this.buildSystemPrompt(currentPortfolio);
 
     let rawJsonText = '';
 
-    if (config.provider === 'gemini') {
-      rawJsonText = await this.callGemini(effectiveApiKey, config.model || 'gemini-1.5-flash', systemPrompt, userPrompt);
-    } else if (config.provider === 'groq') {
-      rawJsonText = await this.callGroq(effectiveApiKey, config.model || 'llama-3.3-70b-versatile', systemPrompt, userPrompt);
-    } else if (config.provider === 'openai') {
-      rawJsonText = await this.callOpenAi(effectiveApiKey, config.model || 'gpt-4o-mini', systemPrompt, userPrompt);
+    if (provider === 'gemini') {
+      rawJsonText = await this.callGemini(effectiveApiKey, model || 'gemini-1.5-flash', systemPrompt, userPrompt);
+    } else if (provider === 'groq') {
+      rawJsonText = await this.callGroq(effectiveApiKey, model || 'llama-3.3-70b-versatile', systemPrompt, userPrompt);
+    } else if (provider === 'openai') {
+      rawJsonText = await this.callOpenAi(effectiveApiKey, model || 'gpt-4o-mini', systemPrompt, userPrompt);
     } else {
-      throw new Error(`Unsupported AI provider: ${config.provider}`);
+      throw new Error(`Unsupported AI provider: ${provider}`);
     }
 
     return this.parseAndValidateResponse(rawJsonText);
@@ -270,8 +350,46 @@ CRITICAL RULES:
     };
   }
 
-  applyActions(actions: PortfolioAiAction[]) {
-    return portfolioStore.applyAiActions(actions);
+  async applyActions(actions: PortfolioAiAction[], forceSyncDb = false): Promise<{
+    success: boolean;
+    appliedCount: number;
+    message: string;
+    dbSynced: boolean;
+    dbMessage?: string;
+  }> {
+    const storeRes = portfolioStore.applyAiActions(actions);
+    if (!storeRes.success) {
+      return {
+        ...storeRes,
+        dbSynced: false,
+      };
+    }
+
+    const shouldSyncDb = forceSyncDb || this.config.autoSyncDb !== false;
+    let dbSynced = false;
+    let dbMessage = '';
+
+    if (shouldSyncDb) {
+      try {
+        const cfRes = await portfolioStore.syncToCloudflare();
+        if (cfRes.success) {
+          dbSynced = true;
+          dbMessage = 'Synchronized with Cloudflare D1 database.';
+        } else {
+          dbMessage = cfRes.error || 'Cloudflare D1 sync failed.';
+        }
+      } catch (err: unknown) {
+        dbMessage = err instanceof Error ? err.message : String(err);
+      }
+    }
+
+    return {
+      success: storeRes.success,
+      appliedCount: storeRes.appliedCount,
+      message: storeRes.message,
+      dbSynced,
+      dbMessage,
+    };
   }
 }
 

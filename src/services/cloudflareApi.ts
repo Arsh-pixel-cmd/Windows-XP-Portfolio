@@ -45,7 +45,18 @@ export class CloudflareService {
   }
 
   getToken(): string {
-    return localStorage.getItem(TOKEN_KEY) || this.config.apiToken || '';
+    const direct = localStorage.getItem(TOKEN_KEY) || this.config.apiToken;
+    if (direct) return direct;
+    try {
+      const session = localStorage.getItem('xp_user_session');
+      if (session) {
+        const parsed = JSON.parse(session);
+        if (parsed?.token) return parsed.token;
+      }
+    } catch {
+      // fallback
+    }
+    return '';
   }
 
   setToken(token: string): void {

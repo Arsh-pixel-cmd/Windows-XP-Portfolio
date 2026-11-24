@@ -95,9 +95,13 @@ export const AiAssistantTab: React.FC<AiAssistantTabProps> = ({ portfolioData, o
 
       let autoApplied = false;
       if (config.autoApply && responsePayload.actions.length > 0) {
-        portfolioAiService.applyActions(responsePayload.actions);
+        const applyRes = await portfolioAiService.applyActions(responsePayload.actions);
         autoApplied = true;
-        onNotify('success', `AI applied ${responsePayload.actions.length} portfolio change(s) automatically!`);
+        if (applyRes.dbSynced) {
+          onNotify('success', `AI applied ${responsePayload.actions.length} change(s) & synced to Cloudflare D1 database!`);
+        } else {
+          onNotify('success', `AI applied ${responsePayload.actions.length} change(s) to live portfolio.`);
+        }
       }
 
       const assistantMessage: AiChatMessage = {
@@ -127,28 +131,26 @@ export const AiAssistantTab: React.FC<AiAssistantTabProps> = ({ portfolioData, o
     }
   };
 
-  const handleApplyActions = (messageId: string, actions: PortfolioAiAction[]) => {
-    const res = portfolioAiService.applyActions(actions);
+  const handleApplyActions = async (messageId: string, actions: PortfolioAiAction[]) => {
+    setIsSyncingCf(true);
+    const res = await portfolioAiService.applyActions(actions, true);
+    setIsSyncingCf(false);
     if (res.success) {
       setMessages(prev =>
         prev.map(m => (m.id === messageId ? { ...m, applied: true } : m))
       );
-      onNotify('success', `Applied ${res.appliedCount} action(s) to live portfolio!`);
+      if (res.dbSynced) {
+        onNotify('success', `Applied ${res.appliedCount} action(s) & saved to Cloudflare D1 database!`);
+      } else {
+        onNotify('success', `Applied ${res.appliedCount} action(s) locally. DB status: ${res.dbMessage || 'Local only'}`);
+      }
     } else {
       onNotify('error', 'Failed to apply actions. Check console for details.');
     }
   };
 
   const handleApplyAndSyncToCloudflare = async (messageId: string, actions: PortfolioAiAction[]) => {
-    handleApplyActions(messageId, actions);
-    setIsSyncingCf(true);
-    const res = await portfolioStore.syncToCloudflare();
-    setIsSyncingCf(false);
-    if (res.success) {
-      onNotify('success', 'Changes applied and synchronized to Cloudflare D1!');
-    } else {
-      onNotify('error', res.error || 'Changes applied locally, but Cloudflare sync failed.');
-    }
+    await handleApplyActions(messageId, actions);
   };
 
   const renderActionPreview = (action: PortfolioAiAction, index: number) => {
@@ -436,12 +438,46 @@ export const AiAssistantTab: React.FC<AiAssistantTabProps> = ({ portfolioData, o
             </div>
           </div>
 
+          {/* Database Consistency Option */}
+          <div className="bg-blue-50 border border-blue-200 rounded p-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Cloud size={16} className="text-blue-600 shrink-0" />
+              <div>
+                <span className="font-bold text-gray-800 block text-xs">
+                  Auto-Sync to Remote Database (Cloudflare D1)
+                </span>
+                <span className="text-[11px] text-gray-600">
+                  Automatically syncs every AI update with your Cloudflare D1 database so all devices stay consistent.
+                </span>
+              </div>
+            </div>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={config.autoSyncDb !== false}
+                onChange={e => setConfig({ ...config, autoSyncDb: e.target.checked })}
+                className="rounded border-gray-300 text-blue-600"
+              />
+              <span className="font-bold text-xs text-blue-900">Enabled</span>
+            </label>
+          </div>
+
           {/* API Key */}
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="font-semibold text-gray-700">
                 {config.provider.toUpperCase()} API Key:
               </label>
+              {config.provider === 'openai' && (
+                <a
+                  href="https://platform.openai.com/api-keys"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-emerald-700 hover:underline flex items-center gap-1 text-[11px]"
+                >
+                  Get OpenAI API Key <ExternalLink size={10} />
+                </a>
+              )}
               {config.provider === 'gemini' && (
                 <a
                   href="https://aistudio.google.com/app/apikey"

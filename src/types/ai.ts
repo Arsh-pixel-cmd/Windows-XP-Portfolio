@@ -8,6 +8,7 @@ export interface AiConfig {
   apiKey: string;
   model: string;
   autoApply: boolean;
+  autoSyncDb?: boolean;
 }
 
 export type PortfolioAiAction =
@@ -78,4 +79,5 @@ export interface AiChatMessage {
   responsePayload?: AiResponsePayload;
   applied?: boolean;
   error?: string;
+  suggestions?: string[];
 }

@@ -62,8 +62,8 @@ export const MediaPlayer: React.FC = () => {
   const oscRef = useRef<OscillatorNode | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
   const stepIdxRef = useRef<number>(0);
-  const musicTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const playTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const musicTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const playTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animFrameRef = useRef<number | null>(null);
 
   const track = TRACKS[currentTrackIdx];
