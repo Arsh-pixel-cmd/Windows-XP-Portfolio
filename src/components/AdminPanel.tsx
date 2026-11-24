@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { 
   Folder, User, Cpu, FlaskConical, Cloud, 
   Plus, Trash2, Edit3, Save, RotateCcw, 
-  ExternalLink, Lock, CheckCircle2, AlertCircle 
+  ExternalLink, Lock, CheckCircle2, AlertCircle,
+  Sparkles 
 } from 'lucide-react';
 import { portfolioStore } from '../core/portfolioStore';
 import { cloudflareApi } from '../services/cloudflareApi';
 import { authStore } from '../core/authStore';
 import { PortfolioData, ProjectItem, ExperimentItem } from '../types/portfolio';
 import { Process, SystemState } from '../core/types';
+import { AiAssistantTab } from './AiAssistantTab';
 
 interface AdminPanelProps {
   process: Process;
@@ -17,7 +19,7 @@ interface AdminPanelProps {
 
 export const AdminPanel: React.FC<AdminPanelProps> = () => {
   const [data, setData] = useState<PortfolioData>(portfolioStore.getData());
-  const [activeTab, setActiveTab] = useState<'projects' | 'profile' | 'skills' | 'experiments' | 'cloudflare'>('projects');
+  const [activeTab, setActiveTab] = useState<'ai' | 'projects' | 'profile' | 'skills' | 'experiments' | 'cloudflare'>('ai');
   
   // Status feedback
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -159,6 +161,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = () => {
       {/* Tabs */}
       <div className="flex bg-[#ECE9D8] border-b border-gray-400 px-2 pt-1 gap-1 text-xs">
         <button
+          onClick={() => setActiveTab('ai')}
+          className={`px-3 py-1.5 rounded-t-sm font-semibold flex items-center gap-1.5 border-t border-l border-r ${
+            activeTab === 'ai'
+              ? 'bg-white border-gray-400 -mb-[1px] pb-2 font-bold text-indigo-700'
+              : 'bg-[#DCD8C8] border-transparent hover:bg-gray-100 text-gray-700'
+          }`}
+        >
+          <Sparkles size={14} className="text-indigo-600 animate-pulse" />
+          AI Copilot (Prompt-to-Portfolio)
+        </button>
+        <button
           onClick={() => setActiveTab('projects')}
           className={`px-3 py-1.5 rounded-t-sm font-semibold flex items-center gap-1.5 border-t border-l border-r ${
             activeTab === 'projects'
@@ -226,9 +239,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = () => {
       )}
 
       {/* Tab Content Area */}
-      <div className="flex-1 overflow-auto p-4 bg-white">
-        {/* PROJECTS TAB */}
-        {activeTab === 'projects' && (
+      {activeTab === 'ai' ? (
+        <div className="flex-1 overflow-hidden">
+          <AiAssistantTab portfolioData={data} onNotify={showNotification} />
+        </div>
+      ) : (
+        <div className="flex-1 overflow-auto p-4 bg-white">
+          {/* PROJECTS TAB */}
+          {activeTab === 'projects' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between pb-2 border-b">
               <div>
@@ -869,7 +887,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = () => {
             </div>
           </div>
         )}
-      </div>
+        </div>
+      )}
 
       {/* Bottom Status Strip */}
       <div className="bg-[#ECE9D8] border-t border-gray-400 px-3 py-1 flex items-center justify-between text-[11px] text-gray-600">

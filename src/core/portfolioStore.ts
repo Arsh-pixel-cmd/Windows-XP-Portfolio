@@ -1,5 +1,6 @@
 // src/core/portfolioStore.ts
 import { PortfolioData, ProjectItem, ProfileData, SkillCategory, ExperimentItem } from '../types/portfolio';
+import { PortfolioAiAction } from '../types/ai';
 import { cloudflareApi } from '../services/cloudflareApi';
 import { systemBus } from './eventBus';
 
@@ -302,6 +303,124 @@ export const portfolioStore = {
       persistAndNotify();
     }
     return { success: true };
+  },
+
+  applyAiActions: (actions: PortfolioAiAction[]): { success: boolean; appliedCount: number; message: string } => {
+    let count = 0;
+    for (const action of actions) {
+      try {
+        switch (action.type) {
+          case 'ADD_PROJECT': {
+            portfolioStore.addProject(action.payload);
+            count++;
+            break;
+          }
+          case 'UPDATE_PROJECT': {
+            const { id, updates } = action.payload;
+            // Match by id or title
+            const target = currentData.projects.find(
+              p => p.id === id || p.title.toLowerCase().includes(id.toLowerCase())
+            );
+            if (target) {
+              portfolioStore.updateProject(target.id, updates);
+              count++;
+            }
+            break;
+          }
+          case 'DELETE_PROJECT': {
+            const { id } = action.payload;
+            const target = currentData.projects.find(
+              p => p.id === id || p.title.toLowerCase().includes(id.toLowerCase())
+            );
+            if (target) {
+              portfolioStore.deleteProject(target.id);
+              count++;
+            }
+            break;
+          }
+          case 'UPDATE_PROFILE': {
+            portfolioStore.updateProfile(action.payload);
+            count++;
+            break;
+          }
+          case 'ADD_SKILL': {
+            const { category, skills } = action.payload;
+            const targetCat = currentData.skills.find(
+              s => s.category.toLowerCase() === category.toLowerCase()
+            );
+            if (targetCat) {
+              const newItems = Array.from(new Set([...targetCat.items, ...skills]));
+              portfolioStore.updateSkillCategory(targetCat.id, { items: newItems });
+            } else {
+              portfolioStore.addSkillCategory(category, skills);
+            }
+            count++;
+            break;
+          }
+          case 'REMOVE_SKILL': {
+            const { category, skill } = action.payload;
+            const targetCat = currentData.skills.find(
+              s => s.category.toLowerCase() === category.toLowerCase()
+            );
+            if (targetCat) {
+              const newItems = targetCat.items.filter(
+                i => i.toLowerCase() !== skill.toLowerCase()
+              );
+              portfolioStore.updateSkillCategory(targetCat.id, { items: newItems });
+              count++;
+            }
+            break;
+          }
+          case 'ADD_EXPERIMENT': {
+            portfolioStore.addExperiment(action.payload);
+            count++;
+            break;
+          }
+          case 'UPDATE_EXPERIMENT': {
+            const { id, updates } = action.payload;
+            const target = currentData.experiments.find(
+              e => e.id === id || e.tag.toLowerCase() === id.toLowerCase() || e.title.toLowerCase().includes(id.toLowerCase())
+            );
+            if (target) {
+              portfolioStore.updateExperiment(target.id, updates);
+              count++;
+            }
+            break;
+          }
+          case 'DELETE_EXPERIMENT': {
+            const { id } = action.payload;
+            const target = currentData.experiments.find(
+              e => e.id === id || e.tag.toLowerCase() === id.toLowerCase() || e.title.toLowerCase().includes(id.toLowerCase())
+            );
+            if (target) {
+              portfolioStore.deleteExperiment(target.id);
+              count++;
+            }
+            break;
+          }
+        }
+      } catch (err) {
+        console.error('Error applying AI action:', action, err);
+      }
+    }
+
+    if (count > 0) {
+      systemBus.emit({
+        type: 'SYS_LOG',
+        payload: {
+          id: `ai-${Date.now()}`,
+          timestamp: Date.now(),
+          level: 'INFO',
+          message: `AI Copilot successfully applied ${count} update(s) to portfolio`,
+        },
+      });
+    }
+
+    return {
+      success: count > 0,
+      appliedCount: count,
+      message: `Successfully executed ${count} action(s).`,
+    };
   },
 
   resetToDefaults: () => {
