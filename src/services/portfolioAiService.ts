@@ -110,10 +110,13 @@ CRITICAL RULES:
 
   async processPrompt(userPrompt: string, currentPortfolio: PortfolioData): Promise<AiResponsePayload> {
     const config = this.getConfig();
+    const effectiveApiKey = (
+      config.apiKey || getEnvKeyForProvider(config.provider as 'gemini' | 'groq' | 'openai') || ''
+    ).trim();
 
-    if (!config.apiKey || !config.apiKey.trim()) {
+    if (!effectiveApiKey) {
       throw new Error(
-        `API Key for ${config.provider.toUpperCase()} is missing. Please enter your API Key in the settings.`
+        `API Key for ${config.provider.toUpperCase()} is missing. Please enter your API Key in the settings or add it to .env.`
       );
     }
 
@@ -122,11 +125,11 @@ CRITICAL RULES:
     let rawJsonText = '';
 
     if (config.provider === 'gemini') {
-      rawJsonText = await this.callGemini(config.apiKey, config.model || 'gemini-1.5-flash', systemPrompt, userPrompt);
+      rawJsonText = await this.callGemini(effectiveApiKey, config.model || 'gemini-1.5-flash', systemPrompt, userPrompt);
     } else if (config.provider === 'groq') {
-      rawJsonText = await this.callGroq(config.apiKey, config.model || 'llama-3.3-70b-versatile', systemPrompt, userPrompt);
+      rawJsonText = await this.callGroq(effectiveApiKey, config.model || 'llama-3.3-70b-versatile', systemPrompt, userPrompt);
     } else if (config.provider === 'openai') {
-      rawJsonText = await this.callOpenAi(config.apiKey, config.model || 'gpt-4o-mini', systemPrompt, userPrompt);
+      rawJsonText = await this.callOpenAi(effectiveApiKey, config.model || 'gpt-4o-mini', systemPrompt, userPrompt);
     } else {
       throw new Error(`Unsupported AI provider: ${config.provider}`);
     }
