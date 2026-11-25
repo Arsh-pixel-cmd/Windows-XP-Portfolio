@@ -399,13 +399,16 @@ export const AiAssistantTab: React.FC<AiAssistantTabProps> = ({ portfolioData, o
                   const p = e.target.value as AiProvider;
                   const defaultModel =
                     p === 'openrouter'
-                      ? 'google/gemini-2.0-flash-exp:free'
+                      ? 'nvidia/nemotron-3.5-lightning:free'
                       : p === 'gemini'
                       ? 'gemini-1.5-flash'
                       : p === 'groq'
                       ? 'llama-3.3-70b-versatile'
                       : 'gpt-4o-mini';
-                  setConfig({ ...config, provider: p, model: defaultModel });
+                  const envKey = portfolioAiService.getKeyForProvider(p);
+                  const newKey = envKey || '';
+                  setConfig({ ...config, provider: p, model: defaultModel, apiKey: newKey });
+                  setApiKeyInput(newKey);
                 }}
                 className="w-full border border-gray-300 rounded px-2 py-1.5 bg-gray-50 text-xs focus:ring-1 focus:ring-indigo-500 outline-none"
               >
